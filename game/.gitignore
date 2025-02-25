@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Capacitor
+android/
+ios/
