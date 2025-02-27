@@ -1,5 +1,7 @@
 import 'phaser';
 import apiService from './services/api';
+import { TitleScene } from './scenes/TitleScene';
+import { ExplorationScene } from './scenes/ExplorationScene';
 
 // プレイヤーデータ用のインターフェース
 interface PlayerData {
@@ -11,7 +13,7 @@ interface PlayerData {
 }
 
 // ゲームデータを管理するグローバルオブジェクト
-const GameManager = {
+export const GameManager = {
   player: null as PlayerData | null,
   
   // プレイヤー認証
@@ -40,106 +42,25 @@ const GameManager = {
   }
 };
 
-class MainScene extends Phaser.Scene {
-    private playerText?: Phaser.GameObjects.Text;
-    private startText?: Phaser.GameObjects.Text;
-    
-    constructor() {
-        super({ key: 'MainScene' });
-    }
-
-    preload() {
-        // アセットのロードはここで行います
-    }
-
-    async create() {
-        // ゲーム開始時の初期化処理
-        this.startText = this.add.text(
-            this.cameras.main.centerX,
-            this.cameras.main.centerY,
-            'ゲームデータを読み込み中...',
-            {
-                fontSize: '32px',
-                color: '#ffffff'
-            }
-        );
-        this.startText.setOrigin(0.5);
-        
-        // プレイヤー情報表示用テキスト
-        this.playerText = this.add.text(
-            20,
-            20,
-            'プレイヤー: 未認証',
-            {
-                fontSize: '16px',
-                color: '#ffffff'
-            }
-        );
-        
-        // プレイヤー認証
-        try {
-            await GameManager.authenticate();
-            
-            // 認証成功
-            if (GameManager.player) {
-                // プレイヤー情報の表示
-                const nickname = GameManager.player.nickname || 'ゲスト';
-                this.playerText.setText(`プレイヤー: ${nickname} (ID: ${GameManager.player.id.substring(0, 8)}...)`);
-                
-                // スタートメッセージの更新
-                this.startText.setText('タップしてスタート');
-            } else {
-                this.startText.setText('認証に失敗しました。再試行してください。');
-            }
-        } catch (error) {
-            console.error('初期化エラー:', error);
-            this.startText.setText('エラーが発生しました。再試行してください。');
-        }
-
-        // 画面タップのイベントリスナー
-        this.input.on('pointerdown', () => {
-            if (GameManager.player) {
-                this.startText!.setText('ゲームスタート！');
-                
-                // ゲームデータを同期する例
-                const demoGameData = {
-                    lastPlayed: new Date().toISOString(),
-                    score: Math.floor(Math.random() * 1000),
-                    level: 1
-                };
-                
-                // サーバーと同期
-                GameManager.syncGameData(demoGameData);
-            }
-        });
-    }
-
-    update() {
-        // ゲームの更新処理はここに書きます
-    }
-}
-
 // ゲーム設定
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent: 'game',
     width: 800,
     height: 600,
+    backgroundColor: '#000000',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 300, x: 0 },
-            debug: false
-        }
-    },
-    scene: MainScene
+    scene: [TitleScene, ExplorationScene]
 };
 
 // ゲームインスタンスの作成
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+    // ゲーム起動前に認証を実行
+    await GameManager.authenticate();
+    
+    // ゲームインスタンスを作成
     new Phaser.Game(config);
 });
