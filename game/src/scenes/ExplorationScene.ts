@@ -41,10 +41,10 @@ export class ExplorationScene extends Phaser.Scene {
     private createInitialMap() {
         // 仮の固定マップを作成
         this.nodes = [
-            { x: 400, y: 100, connections: [1, 2], visited: false },    // 開始ノード
-            { x: 300, y: 200, connections: [0, 3], visited: false },
-            { x: 500, y: 200, connections: [0, 3], visited: false },
-            { x: 400, y: 300, connections: [1, 2], visited: false }     // 終了ノード
+            { x: 400, y: 500, connections: [1, 2], visited: false },    // 開始ノード（下部）
+            { x: 300, y: 400, connections: [0, 3], visited: false },
+            { x: 500, y: 400, connections: [0, 3], visited: false },
+            { x: 400, y: 300, connections: [1, 2], visited: false }     // 終了ノード（上部）
         ];
     }
 
@@ -65,8 +65,9 @@ export class ExplorationScene extends Phaser.Scene {
 
         // ノードを描画
         this.nodes.forEach((node, index) => {
-            // 選択可能なノードか判定
-            const isSelectable = this.nodes[this.currentNodeIndex].connections.includes(index);
+            // 選択可能なノードか判定（接続されていて、かつ上方向にあるノードのみ）
+            const isSelectable = this.nodes[this.currentNodeIndex].connections.includes(index)
+                && this.nodes[index].y < this.nodes[this.currentNodeIndex].y;
             // 描画色を決定
             let color = 0x333333;  // 未訪問
             if (node.visited) color = 0x00ff00;  // 訪問済み
@@ -86,8 +87,8 @@ export class ExplorationScene extends Phaser.Scene {
             const clickedNode = this.nodes[clickedNodeIndex];
             const currentNode = this.nodes[this.currentNodeIndex];
 
-            // クリックされたノードが現在のノードから接続されているか確認
-            if (currentNode.connections.includes(clickedNodeIndex)) {
+            // クリックされたノードが現在のノードから接続されており、かつ上方向への移動であることを確認
+            if (currentNode.connections.includes(clickedNodeIndex) && clickedNode.y < currentNode.y) {
                 // ノードへの移動をアニメーション
                 const duration = 500;  // 500ms
                 const moveMarker = this.add.circle(currentNode.x, currentNode.y, 10, 0xff0000);
