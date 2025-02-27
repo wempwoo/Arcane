@@ -1,51 +1,107 @@
 import Phaser from 'phaser';
 
+// レーンの定義（0: 左, 1: 中央, 2: 右）
+type Lane = 0 | 1 | 2;
+
+// ノードの定義
 interface Node {
-    x: number;
-    y: number;
-    connections: number[];  // 接続されているノードのインデックス
+    level: number;    // 縦方向の位置（0から開始）
+    lane: Lane;       // 横方向の位置
+    connections: NodeConnection[];  // 次のレベルへの接続情報
     visited: boolean;
 }
 
+// ノード接続情報
+interface NodeConnection {
+    targetLevel: number;  // 接続先のレベル（必ず現在のlevel + 1）
+    targetLane: Lane;    // 接続先のレーン
+}
+
+// マップ全体の定義
+interface Map {
+    nodes: Node[];       // マップ上の全ノード
+    maxLevel: number;    // 最大レベル（終了ノードのレベル）
+}
+
 export class ExplorationScene extends Phaser.Scene {
-    private nodes: Node[] = [];
-    private currentNodeIndex: number = 0;
+    private map!: Map;
+    private currentNode!: Node;
     private graphics!: Phaser.GameObjects.Graphics;
+
+    // レイアウト設定
+    private readonly LEVEL_HEIGHT = 100;  // レベル間の縦方向の距離
+    private readonly LANE_WIDTH = 200;    // レーン間の横方向の距離
+    private readonly BASE_Y = 500;        // 開始レベル（0）のY座標
+    private readonly BASE_X = 400;        // 中央レーン（1）のX座標
 
     constructor() {
         super({ key: 'ExplorationScene' });
     }
 
     create() {
-        // グラフィックスオブジェクトを作成
         this.graphics = this.add.graphics();
-
-        // 仮のノードマップを作成（後で外部データから読み込むように変更予定）
         this.createInitialMap();
-
-        // シーン開始時にフェードイン
         this.cameras.main.fadeIn(1000, 0, 0, 0);
 
-        // クリック/タップ判定を追加
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             this.handleNodeSelection(pointer.x, pointer.y);
         });
 
-        // 最初のノードを訪問済みにする
-        this.nodes[this.currentNodeIndex].visited = true;
+        // 開始ノードを現在のノードとして設定
+        this.currentNode = this.map.nodes.find(node => node.level === 0)!;
+        this.currentNode.visited = true;
 
-        // マップを描画
         this.drawMap();
     }
 
     private createInitialMap() {
         // 仮の固定マップを作成
-        this.nodes = [
-            { x: 400, y: 500, connections: [1, 2], visited: false },    // 開始ノード（下部）
-            { x: 300, y: 400, connections: [0, 3], visited: false },
-            { x: 500, y: 400, connections: [0, 3], visited: false },
-            { x: 400, y: 300, connections: [1, 2], visited: false }     // 終了ノード（上部）
-        ];
+        this.map = {
+            maxLevel: 2,
+            nodes: [
+                // レベル0（開始レベル）
+                {
+                    level: 0,
+                    lane: 1,  // 中央レーン
+                    connections: [
+                        { targetLevel: 1, targetLane: 0 },  // 左に分岐
+                        { targetLevel: 1, targetLane: 2 }   // 右に分岐
+                    ],
+                    visited: false
+                },
+                // レベル1
+                {
+                    level: 1,
+                    lane: 0,  // 左レーン
+                    connections: [
+                        { targetLevel: 2, targetLane: 1 }   // 中央に合流
+                    ],
+                    visited: false
+                },
+                {
+                    level: 1,
+                    lane: 2,  // 右レーン
+                    connections: [
+                        { targetLevel: 2, targetLane: 1 }   // 中央に合流
+                    ],
+                    visited: false
+                },
+                // レベル2（終了レベル）
+                {
+                    level: 2,
+                    lane: 1,  // 中央レーン
+                    connections: [],  // 終了ノードは接続なし
+                    visited: false
+                }
+            ]
+        };
+    }
+
+    private getNodeScreenPosition(node: Node): { x: number; y: number } {
+        return {
+            x: this.BASE_X + (node.lane - 1) * this.LANE_WIDTH,  // レーンに基づくX座標
+            y: this.BASE_Y - node.level * this.LEVEL_HEIGHT      // レベルに基づくY座標
+        };
     }
 
     private drawMap() {
@@ -53,57 +109,67 @@ export class ExplorationScene extends Phaser.Scene {
 
         // パスを描画
         this.graphics.lineStyle(2, 0x666666);
-        this.nodes.forEach((node, index) => {
-            node.connections.forEach(connectedIndex => {
-                const connectedNode = this.nodes[connectedIndex];
-                this.graphics.beginPath();
-                this.graphics.moveTo(node.x, node.y);
-                this.graphics.lineTo(connectedNode.x, connectedNode.y);
-                this.graphics.strokePath();
+        this.map.nodes.forEach(node => {
+            const startPos = this.getNodeScreenPosition(node);
+            node.connections.forEach(conn => {
+                const targetNode = this.map.nodes.find(n => 
+                    n.level === conn.targetLevel && n.lane === conn.targetLane
+                );
+                if (targetNode) {
+                    const endPos = this.getNodeScreenPosition(targetNode);
+                    this.graphics.beginPath();
+                    this.graphics.moveTo(startPos.x, startPos.y);
+                    this.graphics.lineTo(endPos.x, endPos.y);
+                    this.graphics.strokePath();
+                }
             });
         });
 
         // ノードを描画
-        this.nodes.forEach((node, index) => {
-            // 選択可能なノードか判定（接続されていて、かつ上方向にあるノードのみ）
-            const isSelectable = this.nodes[this.currentNodeIndex].connections.includes(index)
-                && this.nodes[index].y < this.nodes[this.currentNodeIndex].y;
+        this.map.nodes.forEach(node => {
+            const pos = this.getNodeScreenPosition(node);
+            
+            // 選択可能なノードか判定
+            const isSelectable = this.currentNode.connections.some(conn =>
+                conn.targetLevel === node.level && conn.targetLane === node.lane
+            );
+
             // 描画色を決定
             let color = 0x333333;  // 未訪問
             if (node.visited) color = 0x00ff00;  // 訪問済み
             if (isSelectable) color = 0x00ffff;  // 選択可能
-            if (index === this.currentNodeIndex) color = 0xff0000;  // 現在地
+            if (node === this.currentNode) color = 0xff0000;  // 現在地
 
             this.graphics.fillStyle(color);
-            this.graphics.fillCircle(node.x, node.y, 20);
+            this.graphics.fillCircle(pos.x, pos.y, 20);
         });
     }
 
     private handleNodeSelection(x: number, y: number) {
-        // クリック位置に最も近いノードを探す
-        const clickedNodeIndex = this.findClosestNode(x, y);
+        const clickedNode = this.findClosestNode(x, y);
         
-        if (clickedNodeIndex !== -1) {
-            const clickedNode = this.nodes[clickedNodeIndex];
-            const currentNode = this.nodes[this.currentNodeIndex];
+        if (clickedNode) {
+            const isSelectable = this.currentNode.connections.some(conn =>
+                conn.targetLevel === clickedNode.level && conn.targetLane === clickedNode.lane
+            );
 
-            // クリックされたノードが現在のノードから接続されており、かつ上方向への移動であることを確認
-            if (currentNode.connections.includes(clickedNodeIndex) && clickedNode.y < currentNode.y) {
+            if (isSelectable) {
+                const startPos = this.getNodeScreenPosition(this.currentNode);
+                const endPos = this.getNodeScreenPosition(clickedNode);
+                
                 // ノードへの移動をアニメーション
-                const duration = 500;  // 500ms
-                const moveMarker = this.add.circle(currentNode.x, currentNode.y, 10, 0xff0000);
+                const moveMarker = this.add.circle(startPos.x, startPos.y, 10, 0xff0000);
                 
                 this.tweens.add({
                     targets: moveMarker,
-                    x: clickedNode.x,
-                    y: clickedNode.y,
-                    duration: duration,
+                    x: endPos.x,
+                    y: endPos.y,
+                    duration: 500,
                     ease: 'Power2',
                     onComplete: () => {
                         moveMarker.destroy();
-                        // 移動完了後に状態を更新
-                        this.currentNodeIndex = clickedNodeIndex;
-                        this.nodes[clickedNodeIndex].visited = true;
+                        this.currentNode = clickedNode;
+                        clickedNode.visited = true;
                         this.drawMap();
                     }
                 });
@@ -111,16 +177,17 @@ export class ExplorationScene extends Phaser.Scene {
         }
     }
 
-    private findClosestNode(x: number, y: number): number {
-        const maxDistance = 30;  // クリック判定の最大距離
-        let closestNode = -1;
+    private findClosestNode(x: number, y: number): Node | null {
+        const maxDistance = 30;
+        let closestNode: Node | null = null;
         let closestDistance = maxDistance;
 
-        this.nodes.forEach((node, index) => {
-            const distance = Phaser.Math.Distance.Between(x, y, node.x, node.y);
+        this.map.nodes.forEach(node => {
+            const pos = this.getNodeScreenPosition(node);
+            const distance = Phaser.Math.Distance.Between(x, y, pos.x, pos.y);
             if (distance < closestDistance) {
                 closestDistance = distance;
-                closestNode = index;
+                closestNode = node;
             }
         });
 
