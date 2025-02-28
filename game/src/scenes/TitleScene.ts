@@ -5,6 +5,10 @@ export class TitleScene extends Phaser.Scene {
         super({ key: 'TitleScene' });
     }
 
+    init() {
+        // シーン初期化
+    }
+
     create() {
         // 画面の中央座標を取得
         const centerX = this.cameras.main.centerX;
@@ -24,11 +28,13 @@ export class TitleScene extends Phaser.Scene {
 
         // 画面全体にクリック/タップ判定を追加
         this.input.on('pointerdown', () => {
-            // フェードアウトしながらExplorationSceneに遷移
-            this.cameras.main.fadeOut(1000, 0, 0, 0);
-            this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+            // フェードアウトを開始し、その後すぐにシーン遷移
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+
+            // フェードアウトを開始してすぐにシーン遷移
+            setTimeout(() => {
                 this.scene.start('ExplorationScene');
-            });
+            }, 100); // フェードアウトが始まってすぐに遷移
         });
 
         // シーン開始時にフェードイン

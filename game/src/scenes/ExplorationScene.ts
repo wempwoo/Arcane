@@ -16,6 +16,10 @@ export class ExplorationScene extends Phaser.Scene {
         super({ key: 'ExplorationScene' });
     }
 
+    init() {
+        // シーン初期化
+    }
+
     create() {
         // マップの生成
         this.mapGenerator = new MapGenerator(this.maxLevel);
@@ -38,8 +42,10 @@ export class ExplorationScene extends Phaser.Scene {
         );
 
         // カメラの初期位置を設定
-        this.cameras.main.setScroll(0, this.mapRenderer.calculateCameraY(this.currentNode) - 300); // なぜか300ずらすとちょうどいい
-        this.cameras.main.fadeIn(1000, 0, 0, 0);
+        this.cameras.main.setScroll(0, this.mapRenderer.calculateCameraY(this.currentNode) - 300);
+
+        // フェードイン開始
+        this.cameras.main.fadeIn(500, 0, 0, 0);
 
         // 初期描画
         this.mapRenderer.draw();
