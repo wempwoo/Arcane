@@ -46,8 +46,8 @@ export const GameManager = {
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent: 'game',
-    width: 800,
-    height: 600,
+    width: 390,
+    height: 844,
     backgroundColor: '#000000',
     scale: {
         mode: Phaser.Scale.FIT,

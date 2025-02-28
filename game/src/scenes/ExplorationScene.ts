@@ -42,7 +42,7 @@ export class ExplorationScene extends Phaser.Scene {
         );
 
         // カメラの初期位置を設定
-        this.cameras.main.setScroll(0, this.mapRenderer.calculateCameraY(this.currentNode) - 300);
+        this.cameras.main.setScroll(0, this.mapRenderer.calculateInitialCameraY(this.currentNode));
 
         // フェードイン開始
         this.cameras.main.fadeIn(500, 0, 0, 0);

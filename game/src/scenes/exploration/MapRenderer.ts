@@ -8,9 +8,9 @@ export class MapRenderer {
 
     // レイアウト設定
     private readonly LEVEL_HEIGHT = 100;
-    private readonly LANE_WIDTH = 200;
-    private readonly BASE_X = 400;
-    private readonly WORLD_WIDTH = 800;
+    private readonly LANE_WIDTH = 100; // スマートフォン画面に合わせて調整
+    private readonly BASE_X = 195; // WORLD_WIDTHの半分
+    private readonly WORLD_WIDTH = 390; // 一般的なスマートフォンの画面幅
     private readonly WORLD_MARGIN = 100;
 
     constructor(
@@ -41,9 +41,13 @@ export class MapRenderer {
         };
     }
 
+    calculateInitialCameraY(node: Node): number {
+        return this.calculateCameraY(node) - 420;
+    }
+
     calculateCameraY(node: Node): number {
         const levelOffset = node.level * this.LEVEL_HEIGHT;
-        const screenOffset = 300; // カメラの位置調整
+        const screenOffset = 100; // HUDを考慮したカメラの位置調整
         return -levelOffset - screenOffset;
     }
 
