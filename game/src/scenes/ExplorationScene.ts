@@ -3,6 +3,7 @@ import { Node } from './exploration/types';
 import { MapGenerator } from './exploration/MapGenerator';
 import { MapRenderer } from './exploration/MapRenderer';
 import { InputHandler } from './exploration/InputHandler';
+import { HUD } from './exploration/HUD';
 
 export class ExplorationScene extends Phaser.Scene {
     private mapGenerator!: MapGenerator;
@@ -11,6 +12,7 @@ export class ExplorationScene extends Phaser.Scene {
     private map!: Map<string, Node>;
     private currentNode!: Node;
     private readonly maxLevel: number = 10;
+    private hud!: HUD;
 
     constructor() {
         super({ key: 'ExplorationScene' });
@@ -40,6 +42,9 @@ export class ExplorationScene extends Phaser.Scene {
             this.currentNode,
             this.handleNodeSelected.bind(this)
         );
+
+        // HUDの初期化
+        this.hud = new HUD(this);
 
         // カメラの初期位置を設定
         this.cameras.main.setScroll(0, this.mapRenderer.calculateInitialCameraY(this.currentNode));
