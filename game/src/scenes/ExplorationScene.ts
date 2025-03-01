@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Node } from './exploration/types';
+import { Node, NodeType } from './exploration/types';
 import { MapGenerator } from './exploration/MapGenerator';
 import { MapRenderer } from './exploration/MapRenderer';
 import { InputHandler } from './exploration/InputHandler';
@@ -18,8 +18,17 @@ export class ExplorationScene extends Phaser.Scene {
         super({ key: 'ExplorationScene' });
     }
 
-    init() {
-        // シーン初期化
+    init(data: { battleResult?: 'victory' | 'defeat' }) {
+        // 戦闘シーンからの戻り時の処理
+        if (data.battleResult === 'victory') {
+            // 戦闘に勝利した場合、現在のノードを訪問済みにマーク
+            if (this.currentNode) {
+                this.currentNode.visited = true;
+                // マップの状態を更新
+                this.mapRenderer?.updateState(this.map, this.currentNode);
+                this.inputHandler?.updateState(this.currentNode);
+            }
+        }
     }
 
     create() {
@@ -60,6 +69,16 @@ export class ExplorationScene extends Phaser.Scene {
         // ノードの状態を更新
         this.currentNode = node;
         node.visited = true;
+
+        // 戦闘ノードの場合、戦闘シーンに遷移
+        if (node.type === NodeType.Battle) {
+            // フェードアウトしてから戦闘シーンへ
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('BattleScene');
+            });
+            return;
+        }
 
         // コンポーネントの状態を更新
         this.mapRenderer.updateState(this.map, this.currentNode);

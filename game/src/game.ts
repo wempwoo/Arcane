@@ -2,6 +2,7 @@ import 'phaser';
 import apiService from './services/api';
 import { TitleScene } from './scenes/TitleScene';
 import { ExplorationScene } from './scenes/ExplorationScene';
+import { BattleScene } from './scenes/BattleScene';
 
 // プレイヤーデータ用のインターフェース
 interface PlayerData {
@@ -53,7 +54,7 @@ const config: Phaser.Types.Core.GameConfig = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
-    scene: [TitleScene, ExplorationScene]
+    scene: [TitleScene, ExplorationScene, BattleScene]
 };
 
 // ゲームインスタンスの作成
