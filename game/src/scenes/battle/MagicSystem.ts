@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+
 import { Unit, UnitManager } from './UnitManager';
 
 interface MagicProjectile {

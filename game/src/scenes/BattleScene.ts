@@ -1,6 +1,7 @@
 import { Scene } from 'phaser';
-import { UnitManager } from './battle/UnitManager';
+
 import { MagicSystem } from './battle/MagicSystem';
+import { UnitManager } from './battle/UnitManager';
 
 export class BattleScene extends Scene {
     private battleResult: 'victory' | 'defeat' | null = null;

@@ -1,8 +1,10 @@
-import express from 'express';
+import { createServer } from 'http';
+
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { createServer } from 'http';
+import express from 'express';
 import { Server } from 'socket.io';
+
 import apiRoutes from './routes/api';
 
 // 環境変数の読み込み

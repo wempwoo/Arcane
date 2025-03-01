@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+
 import { HPBar } from './HPBar';
 
 export interface Unit {

@@ -1,6 +1,7 @@
 import express from 'express';
-import { authenticate, protect } from '../middleware/auth';
+
 import { getProfile, updateProfile, syncGameData } from '../controllers/playerController';
+import { authenticate, protect } from '../middleware/auth';
 
 const router = express.Router();
 

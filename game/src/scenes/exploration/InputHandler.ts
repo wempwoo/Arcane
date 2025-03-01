@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
-import { Node } from './types';
+
 import { MapRenderer } from './MapRenderer';
+import { Node } from './types';
 
 export class InputHandler {
     private scene: Phaser.Scene;

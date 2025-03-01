@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
-import { Node, NodeType } from './exploration/types';
+
+import { HUD } from './exploration/HUD';
+import { InputHandler } from './exploration/InputHandler';
 import { MapGenerator } from './exploration/MapGenerator';
 import { MapRenderer } from './exploration/MapRenderer';
-import { InputHandler } from './exploration/InputHandler';
-import { HUD } from './exploration/HUD';
+import { Node, NodeType } from './exploration/types';
 
 export class ExplorationScene extends Phaser.Scene {
     private mapGenerator!: MapGenerator;

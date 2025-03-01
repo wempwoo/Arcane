@@ -1,8 +1,8 @@
 import 'phaser';
-import apiService from './services/api';
-import { TitleScene } from './scenes/TitleScene';
-import { ExplorationScene } from './scenes/ExplorationScene';
 import { BattleScene } from './scenes/BattleScene';
+import { ExplorationScene } from './scenes/ExplorationScene';
+import { TitleScene } from './scenes/TitleScene';
+import apiService from './services/api';
 
 // プレイヤーデータ用のインターフェース
 interface PlayerData {
