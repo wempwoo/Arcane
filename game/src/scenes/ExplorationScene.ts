@@ -20,7 +20,7 @@ export class ExplorationScene extends Phaser.Scene {
         super({ key: 'ExplorationScene' });
     }
 
-    init(data: { battleResult?: 'victory' | 'defeat' }) {
+    public init(data: { battleResult?: 'victory' | 'defeat' }): void {
         // 戦闘シーンからの戻り時の処理
         if (data.battleResult === 'victory') {
             // 戦闘に勝利した場合、現在のノードを訪問済みにマーク
@@ -32,50 +32,50 @@ export class ExplorationScene extends Phaser.Scene {
             }
         }
     }
-create() {
-    if (!this.isInitialized) {
-        // 初回のみマップを生成
-        this.mapGenerator = new MapGenerator(this.maxLevel);
-        this.map = this.mapGenerator.generateMap();
-        
-        // 開始ノードを設定
-        this.currentNode = this.mapGenerator.getNode(0, 1)!; // Lane.Center = 1
-        this.currentNode.visited = true;
-        
-        this.isInitialized = true;
-    }
 
-    // レンダラーの初期化（毎回必要）
-    this.mapRenderer = new MapRenderer(this, this.map, this.currentNode);
-    this.mapRenderer.setupCamera(this, this.maxLevel);
+    public create(): void {
+        if (!this.isInitialized) {
+            // 初回のみマップを生成
+            this.mapGenerator = new MapGenerator(this.maxLevel);
+            this.map = this.mapGenerator.generateMap();
+            
+            // 開始ノードを設定
+            this.currentNode = this.mapGenerator.getNode(0, 1)!; // Lane.Center = 1
+            this.currentNode.visited = true;
+            
+            this.isInitialized = true;
+        }
 
-    // 入力ハンドラーの初期化
-    this.inputHandler = new InputHandler(
-        this,
-        this.mapRenderer,
-        this.currentNode,
-        this.handleNodeSelected.bind(this)
-    );
+        // レンダラーの初期化（毎回必要）
+        this.mapRenderer = new MapRenderer(this, this.map, this.currentNode);
+        this.mapRenderer.setupCamera(this, this.maxLevel);
 
-    // HUDの初期化
-    this.hud = new HUD(this);
+        // 入力ハンドラーの初期化
+        this.inputHandler = new InputHandler(
+            this,
+            this.mapRenderer,
+            this.currentNode,
+            this.handleNodeSelected.bind(this)
+        );
 
-    // カメラの初期位置を設定
-    this.cameras.main.setScroll(0, this.mapRenderer.calculateInitialCameraY(this.currentNode));
+        // HUDの初期化
+        this.hud = new HUD(this);
 
-    // マップの状態を更新（戦闘からの復帰時に必要）
-    this.mapRenderer.updateState(this.map, this.currentNode);
-    this.inputHandler.updateState(this.currentNode);
+        // カメラの初期位置を設定
+        this.cameras.main.setScroll(0, this.mapRenderer.calculateInitialCameraY(this.currentNode));
 
-    // フェードイン開始
-    this.cameras.main.fadeIn(500, 0, 0, 0);
+        // マップの状態を更新（戦闘からの復帰時に必要）
+        this.mapRenderer.updateState(this.map, this.currentNode);
+        this.inputHandler.updateState(this.currentNode);
 
-    // 初期描画
-    this.mapRenderer.draw();
+        // フェードイン開始
+        this.cameras.main.fadeIn(500, 0, 0, 0);
+
+        // 初期描画
         this.mapRenderer.draw();
     }
 
-    private handleNodeSelected(node: Node) {
+    private handleNodeSelected(node: Node): void {
         // ノードの状態を更新
         this.currentNode = node;
         node.visited = true;

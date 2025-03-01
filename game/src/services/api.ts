@@ -2,6 +2,8 @@
  * バックエンドAPIとの通信を管理するサービス
  */
 
+import { AuthResponse, GameData, GameDataResponse, Player, ProfileResponse, ProfileUpdateData, RequestOptions, ApiHeaders } from './types';
+
 // APIの基本URL（開発環境と本番環境で切り替え）
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -61,11 +63,11 @@ const removeAuthToken = (): void => {
  */
 const createRequestOptions = (
   method: string,
-  data?: any,
-  requireAuth: boolean = false
-): RequestInit => {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+  data?: unknown,
+  requireAuth = false
+): RequestOptions => {
+  const headers: ApiHeaders = {
+    'Content-Type': 'application/json'
   };
 
   // 認証が必要な場合はトークンを追加
@@ -76,9 +78,9 @@ const createRequestOptions = (
     }
   }
 
-  const options: RequestInit = {
+  const options: RequestOptions = {
     method,
-    headers,
+    headers
   };
 
   // データがある場合はJSONに変換
@@ -92,7 +94,7 @@ const createRequestOptions = (
 /**
  * 認証および新規登録
  */
-const authenticate = async (): Promise<any> => {
+const authenticate = async (): Promise<Player> => {
   try {
     const deviceId = getDeviceId();
     const response = await fetch(
@@ -104,7 +106,7 @@ const authenticate = async (): Promise<any> => {
       throw new Error('認証に失敗しました');
     }
     
-    const data = await response.json();
+    const data = await response.json() as AuthResponse;
     
     // トークンを保存
     if (data.token) {
@@ -121,7 +123,7 @@ const authenticate = async (): Promise<any> => {
 /**
  * プロファイル取得
  */
-const getProfile = async (): Promise<any> => {
+const getProfile = async (): Promise<Player> => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/players/profile`, 
@@ -132,7 +134,7 @@ const getProfile = async (): Promise<any> => {
       throw new Error('プロファイルの取得に失敗しました');
     }
     
-    const data = await response.json();
+    const data = await response.json() as ProfileResponse;
     return data.data;
   } catch (error) {
     console.error('プロファイル取得エラー:', error);
@@ -143,7 +145,7 @@ const getProfile = async (): Promise<any> => {
 /**
  * プロファイル更新
  */
-const updateProfile = async (profileData: any): Promise<any> => {
+const updateProfile = async (profileData: ProfileUpdateData): Promise<Player> => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/players/profile`,
@@ -154,7 +156,7 @@ const updateProfile = async (profileData: any): Promise<any> => {
       throw new Error('プロファイルの更新に失敗しました');
     }
     
-    const data = await response.json();
+    const data = await response.json() as ProfileResponse;
     return data.data;
   } catch (error) {
     console.error('プロファイル更新エラー:', error);
@@ -165,7 +167,7 @@ const updateProfile = async (profileData: any): Promise<any> => {
 /**
  * ゲームデータ同期
  */
-const syncGameData = async (gameData: any): Promise<any> => {
+const syncGameData = async (gameData: GameData): Promise<GameDataResponse['data']> => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/players/sync`,
@@ -176,7 +178,7 @@ const syncGameData = async (gameData: any): Promise<any> => {
       throw new Error('ゲームデータの同期に失敗しました');
     }
     
-    const data = await response.json();
+    const data = await response.json() as GameDataResponse;
     return data.data;
   } catch (error) {
     console.error('ゲームデータ同期エラー:', error);

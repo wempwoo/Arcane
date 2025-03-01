@@ -1,14 +1,33 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-// MongoDBを使用しないため、モデルのインポートをコメントアウト
-// import Player from '../models/Player';
+import { Secret, SignOptions, sign, verify } from 'jsonwebtoken';
+
+// ゲームデータの型定義
+interface GameData {
+  inventory: {
+    items: {
+      id: string;
+      quantity: number;
+    }[];
+    gold: number;
+  };
+  progress: {
+    completedQuests: string[];
+    unlockedAreas: string[];
+    currentArea: string;
+  };
+  stats: {
+    playTime: number;
+    battlesWon: number;
+    battlesLost: number;
+  };
+}
 
 // モックプレイヤーデータ（開発用）
 interface MockPlayer {
   _id: string;
   deviceId: string;
   nickname?: string;
-  gameData: any;
+  gameData: GameData;
   lastLogin: Date;
   createdAt: Date;
 }
@@ -24,13 +43,14 @@ interface DecodedToken {
 }
 
 // リクエストプレイヤーの型を拡張
-declare global {
-  namespace Express {
-    interface Request {
-      player?: any;
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    player?: MockPlayer;
   }
 }
+
+// 30日をセカンドに変換
+const THIRTY_DAYS_IN_SECONDS = 30 * 24 * 60 * 60;
 
 // デバイスIDによる認証（開発版）
 export const authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -52,7 +72,22 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       player = {
         _id: playerId,
         deviceId,
-        gameData: {},
+        gameData: {
+          inventory: {
+            items: [],
+            gold: 0
+          },
+          progress: {
+            completedQuests: [],
+            unlockedAreas: [],
+            currentArea: 'start'
+          },
+          stats: {
+            playTime: 0,
+            battlesWon: 0,
+            battlesLost: 0
+          }
+        },
         lastLogin: new Date(),
         createdAt: new Date()
       };
@@ -62,15 +97,16 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     // 最終ログイン日時を更新
     player.lastLogin = new Date();
 
-    // トークンを生成（型エラーを一時的に抑制）
+    // トークンを生成
     const jwtSecret = process.env.JWT_SECRET || 'default_secret';
-    const expiresIn = process.env.JWT_EXPIRES_IN || '30d';
+    const options: SignOptions = { 
+      expiresIn: parseInt(process.env.JWT_EXPIRES_IN || String(THIRTY_DAYS_IN_SECONDS))
+    };
     
-    // TypeScript型エラーを一時的に回避するためのany型使用
-    const token = (jwt as any).sign(
+    const token = sign(
       { id: player._id },
-      jwtSecret,
-      { expiresIn }
+      jwtSecret as Secret,
+      options
     );
 
     // リクエストにプレイヤー情報を追加
@@ -101,9 +137,9 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
       return;
     }
 
-    // トークンを検証（型エラーを一時的に抑制）
+    // トークンを検証
     const jwtSecret = process.env.JWT_SECRET || 'default_secret';
-    const decoded = (jwt as any).verify(token, jwtSecret) as DecodedToken;
+    const decoded = verify(token, jwtSecret as Secret) as DecodedToken;
 
     // プレイヤーをIDで検索（モックデータから）
     const player = Object.values(mockPlayers).find(p => p._id === decoded.id);

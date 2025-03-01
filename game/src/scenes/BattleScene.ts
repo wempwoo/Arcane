@@ -12,7 +12,7 @@ export class BattleScene extends Scene {
         super({ key: 'BattleScene' });
     }
 
-    create() {
+    public create(): void {
         // 背景色を設定
         this.cameras.main.setBackgroundColor('#000033');
 
@@ -54,7 +54,7 @@ export class BattleScene extends Scene {
         this.cameras.main.fadeIn(500, 0, 0, 0);
     }
 
-    private endBattle(result: 'victory' | 'defeat') {
+    private endBattle(result: 'victory' | 'defeat'): void {
         this.battleResult = result;
         
         // 各システムのクリーンアップ
@@ -68,7 +68,7 @@ export class BattleScene extends Scene {
         });
     }
 
-    update(time: number) {
+    public update(time: number): void {
         // 魔法システムの更新
         this.magicSystem.update(time);
     }
