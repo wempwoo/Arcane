@@ -25,12 +25,19 @@ export interface Path<L extends Lane = Lane> {
     direction: PossiblePaths<L>;
 }
 
+// ノードタイプの定義
+export const enum NodeType {
+    Basic = 'basic',
+    Battle = 'battle'
+}
+
 // ノードの定義
 export interface Node {
     level: number;
     lane: Lane;
     connections: NodeConnection[];
     visited: boolean;
+    type: NodeType;
 }
 
 // ノード接続情報

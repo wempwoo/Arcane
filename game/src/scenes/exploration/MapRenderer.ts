@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Lane, Node, NodePosition } from './types';
+import { Lane, Node, NodePosition, NodeType } from './types';
 
 export class MapRenderer {
     private graphics: Phaser.GameObjects.Graphics;
@@ -94,14 +94,53 @@ export class MapRenderer {
                 conn.targetLevel === node.level && conn.targetLane === node.lane
             );
 
-            // 描画色を決定
-            let color = 0x333333;  // 未訪問
-            if (node.visited) color = 0x00ff00;  // 訪問済み
-            if (isSelectable) color = 0x00ffff;  // 選択可能
-            if (node === this.currentNode) color = 0xff0000;  // 現在地
+            // 選択可能なノードの輝きエフェクト
+            if (isSelectable) {
+                // 外側の輝き（半透明の大きな円）
+                this.graphics.fillStyle(0x00ffff, 0.3);
+                this.graphics.fillCircle(pos.x, pos.y, 30);
+                
+                // 内側の輝き（より濃い色の中間サイズの円）
+                this.graphics.fillStyle(0x00ffff, 0.5);
+                this.graphics.fillCircle(pos.x, pos.y, 25);
+            }
 
-            this.graphics.fillStyle(color);
+            // 基本色を決定（ノードタイプに基づく）
+            let baseColor = node.type === NodeType.Battle ? 0xff0000 : 0x333333;
+
+            // 状態による色の上書き
+            if (node.visited) baseColor = 0x00ff00;  // 訪問済み
+            if (node === this.currentNode) baseColor = 0xffff00;  // 現在地は黄色
+
+            // メインのノードを描画
+            this.graphics.fillStyle(baseColor);
             this.graphics.fillCircle(pos.x, pos.y, 20);
+
+            // 戦闘ノードの場合、剣マークを描画（十字線で表現）
+            if (node.type === NodeType.Battle && !node.visited) {
+                this.graphics.lineStyle(2, 0xffffff);
+                // 縦線
+                this.graphics.beginPath();
+                this.graphics.moveTo(pos.x, pos.y - 10);
+                this.graphics.lineTo(pos.x, pos.y + 10);
+                this.graphics.strokePath();
+                // 横線
+                this.graphics.beginPath();
+                this.graphics.moveTo(pos.x - 10, pos.y);
+                this.graphics.lineTo(pos.x + 10, pos.y);
+                this.graphics.strokePath();
+            }
+
+            // 訪問済みノードのチェックマーク
+            if (node.visited) {
+                this.graphics.lineStyle(2, 0xffffff);
+                this.graphics.beginPath();
+                // チェックマークの描画（√形）
+                this.graphics.moveTo(pos.x - 8, pos.y);
+                this.graphics.lineTo(pos.x - 3, pos.y + 5);
+                this.graphics.lineTo(pos.x + 8, pos.y - 6);
+                this.graphics.strokePath();
+            }
         });
     }
 

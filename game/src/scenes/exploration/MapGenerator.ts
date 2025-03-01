@@ -1,4 +1,4 @@
-import { Lane, PathDirection, Node, Path, PossiblePaths } from './types';
+import { Lane, PathDirection, Node, Path, PossiblePaths, NodeType } from './types';
 
 export class MapGenerator {
     private map: Map<string, Node>;
@@ -136,12 +136,22 @@ export class MapGenerator {
         });
     }
 
+    private determineNodeType(level: number): NodeType {
+        // 開始ノード（level 0）と終了ノード（maxLevel）は基本ノード
+        if (level === 0 || level === this.maxLevel) {
+            return NodeType.Basic;
+        }
+        // その他のノードは30%の確率で戦闘ノード
+        return Math.random() < 0.3 ? NodeType.Battle : NodeType.Basic;
+    }
+
     private createNode(level: number, lane: Lane): Node {
         const node: Node = {
             level,
             lane,
             connections: [],
-            visited: false
+            visited: false,
+            type: this.determineNodeType(level)
         };
         this.map.set(`${level},${lane}`, node);
         return node;
