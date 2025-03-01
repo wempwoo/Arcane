@@ -13,6 +13,7 @@ export class ExplorationScene extends Phaser.Scene {
     private currentNode!: Node;
     private readonly maxLevel: number = 10;
     private hud!: HUD;
+    private isInitialized: boolean = false;
 
     constructor() {
         super({ key: 'ExplorationScene' });
@@ -30,38 +31,46 @@ export class ExplorationScene extends Phaser.Scene {
             }
         }
     }
-
-    create() {
-        // マップの生成
+create() {
+    if (!this.isInitialized) {
+        // 初回のみマップを生成
         this.mapGenerator = new MapGenerator(this.maxLevel);
         this.map = this.mapGenerator.generateMap();
         
         // 開始ノードを設定
         this.currentNode = this.mapGenerator.getNode(0, 1)!; // Lane.Center = 1
         this.currentNode.visited = true;
+        
+        this.isInitialized = true;
+    }
 
-        // レンダラーの初期化
-        this.mapRenderer = new MapRenderer(this, this.map, this.currentNode);
-        this.mapRenderer.setupCamera(this, this.maxLevel);
+    // レンダラーの初期化（毎回必要）
+    this.mapRenderer = new MapRenderer(this, this.map, this.currentNode);
+    this.mapRenderer.setupCamera(this, this.maxLevel);
 
-        // 入力ハンドラーの初期化
-        this.inputHandler = new InputHandler(
-            this,
-            this.mapRenderer,
-            this.currentNode,
-            this.handleNodeSelected.bind(this)
-        );
+    // 入力ハンドラーの初期化
+    this.inputHandler = new InputHandler(
+        this,
+        this.mapRenderer,
+        this.currentNode,
+        this.handleNodeSelected.bind(this)
+    );
 
-        // HUDの初期化
-        this.hud = new HUD(this);
+    // HUDの初期化
+    this.hud = new HUD(this);
 
-        // カメラの初期位置を設定
-        this.cameras.main.setScroll(0, this.mapRenderer.calculateInitialCameraY(this.currentNode));
+    // カメラの初期位置を設定
+    this.cameras.main.setScroll(0, this.mapRenderer.calculateInitialCameraY(this.currentNode));
 
-        // フェードイン開始
-        this.cameras.main.fadeIn(500, 0, 0, 0);
+    // マップの状態を更新（戦闘からの復帰時に必要）
+    this.mapRenderer.updateState(this.map, this.currentNode);
+    this.inputHandler.updateState(this.currentNode);
 
-        // 初期描画
+    // フェードイン開始
+    this.cameras.main.fadeIn(500, 0, 0, 0);
+
+    // 初期描画
+    this.mapRenderer.draw();
         this.mapRenderer.draw();
     }
 
