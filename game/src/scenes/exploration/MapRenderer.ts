@@ -107,7 +107,15 @@ export class MapRenderer {
             }
 
             // 基本色を決定（ノードタイプに基づく）
-            let baseColor = node.type === NodeType.Battle ? 0xff0000 : 0x333333;
+            let baseColor = 0x333333; // デフォルト色
+            switch (node.type) {
+                case NodeType.Battle:
+                    baseColor = 0xff0000; // 戦闘ノードは赤色
+                    break;
+                case NodeType.SafeHaven:
+                    baseColor = 0x0088ff; // 安全地帯は青色
+                    break;
+            }
 
             // 状態による色の上書き
             if (node.visited) baseColor = 0x00ff00;  // 訪問済み
@@ -117,19 +125,34 @@ export class MapRenderer {
             this.graphics.fillStyle(baseColor);
             this.graphics.fillCircle(pos.x, pos.y, 20);
 
-            // 戦闘ノードの場合、剣マークを描画（十字線で表現）
-            if (node.type === NodeType.Battle && !node.visited) {
+            // 未訪問ノードのアイコン描画
+            if (!node.visited) {
                 this.graphics.lineStyle(2, 0xffffff);
-                // 縦線
-                this.graphics.beginPath();
-                this.graphics.moveTo(pos.x, pos.y - 10);
-                this.graphics.lineTo(pos.x, pos.y + 10);
-                this.graphics.strokePath();
-                // 横線
-                this.graphics.beginPath();
-                this.graphics.moveTo(pos.x - 10, pos.y);
-                this.graphics.lineTo(pos.x + 10, pos.y);
-                this.graphics.strokePath();
+                
+                if (node.type === NodeType.Battle) {
+                    // 戦闘ノードの剣マーク（十字線で表現）
+                    // 縦線
+                    this.graphics.beginPath();
+                    this.graphics.moveTo(pos.x, pos.y - 10);
+                    this.graphics.lineTo(pos.x, pos.y + 10);
+                    this.graphics.strokePath();
+                    // 横線
+                    this.graphics.beginPath();
+                    this.graphics.moveTo(pos.x - 10, pos.y);
+                    this.graphics.lineTo(pos.x + 10, pos.y);
+                    this.graphics.strokePath();
+                } else if (node.type === NodeType.SafeHaven) {
+                    // 安全地帯のシールドマーク
+                    // シールドの外枠
+                    this.graphics.beginPath();
+                    this.graphics.moveTo(pos.x - 8, pos.y - 8);
+                    this.graphics.lineTo(pos.x + 8, pos.y - 8);
+                    this.graphics.lineTo(pos.x + 8, pos.y + 4);
+                    this.graphics.lineTo(pos.x, pos.y + 8);
+                    this.graphics.lineTo(pos.x - 8, pos.y + 4);
+                    this.graphics.closePath();
+                    this.graphics.strokePath();
+                }
             }
 
             // 訪問済みノードのチェックマーク

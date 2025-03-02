@@ -1,5 +1,6 @@
 import 'phaser';
 import { BattleScene } from './scenes/BattleScene';
+import { BuildScene } from './scenes/BuildScene';
 import { ExplorationScene } from './scenes/ExplorationScene';
 import { TitleScene } from './scenes/TitleScene';
 import apiService from './services/api';

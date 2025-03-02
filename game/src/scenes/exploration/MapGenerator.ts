@@ -141,8 +141,16 @@ export class MapGenerator {
         if (level === 0 || level === this.maxLevel) {
             return NodeType.Basic;
         }
-        // その他のノードは30%の確率で戦闘ノード
-        return Math.random() < 0.3 ? NodeType.Battle : NodeType.Basic;
+
+        // その他のノードはランダムで決定
+        const random = Math.random();
+        if (random < 0.3) {
+            return NodeType.Battle;    // 30%の確率で戦闘ノード
+        } else if (random < 0.4) {
+            return NodeType.SafeHaven; // 10%の確率で安全地帯
+        } else {
+            return NodeType.Basic;     // 60%の確率で基本ノード
+        }
     }
 
     private createNode(level: number, lane: Lane): Node {

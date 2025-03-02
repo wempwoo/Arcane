@@ -28,7 +28,8 @@ export interface Path<L extends Lane = Lane> {
 // ノードタイプの定義
 export const enum NodeType {
     Basic = 'basic',
-    Battle = 'battle'
+    Battle = 'battle',
+    SafeHaven = 'safe_haven' // 安全地帯ノード - Arcaionのビルドが可能な特別なノード
 }
 
 // ノードの定義
