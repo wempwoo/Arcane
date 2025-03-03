@@ -29,7 +29,10 @@ export class BuildScene extends Scene {
         ).setInteractive();
 
         backButton.on('pointerdown', () => {
-            this.scene.start('ExplorationScene');
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('ExplorationScene', { fromBuild: true });
+            });
         });
     }
 }

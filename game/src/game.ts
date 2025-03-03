@@ -63,7 +63,7 @@ const config: Phaser.Types.Core.GameConfig = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
-    scene: [TitleScene, ExplorationScene, BattleScene]
+    scene: [TitleScene, ExplorationScene, BattleScene, BuildScene]
 };
 
 // ゲームインスタンスの作成
