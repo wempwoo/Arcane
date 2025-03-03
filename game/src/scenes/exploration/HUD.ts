@@ -15,14 +15,17 @@ export class HUD {
         const screenHeight = this.scene.cameras.main.height;
         
         // 上部HUD
-        this.topHUD = this.scene.add.container(screenWidth / 2, 0);
-        const topBg = this.scene.add.rectangle(0, 30, screenWidth, 60, 0x333333);
-        const topText = this.scene.add.text(-screenWidth/2 + 10, 10, "Floor 1 - Dungeon", {
+        this.topHUD = this.scene.add.container(100, 20);
+        this.topHUD.setScrollFactor(0);
+        this.topHUD.setSize(screenWidth, 60);
+        const topBg = this.scene.add.rectangle(0, 0, screenWidth, 60, 0x333333);
+        const topText = this.scene.add.text(0, 0, "Floor 1 - Dungeon", {
             fontSize: '24px',
             color: '#ffffff'
         });
+        Phaser.Display.Align.In.TopLeft(topBg, this.topHUD);
+        Phaser.Display.Align.In.TopLeft(topText, topBg);
         this.topHUD.add([topBg, topText]);
-        this.topHUD.setScrollFactor(0);
 
         // 下部HUD
         this.bottomHUD = this.scene.add.container(screenWidth / 2, screenHeight);
@@ -33,6 +36,15 @@ export class HUD {
         });
         this.bottomHUD.add([bottomBg, bottomText]);
         this.bottomHUD.setScrollFactor(0);
+        // ヒットエリアのサイズを設定し、インタラクティブにする
+        const hitArea = new Phaser.Geom.Rectangle(-screenWidth / 2, -120, screenWidth, 120);
+        this.bottomHUD.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
+
+        // クリックイベントの登録
+        this.bottomHUD.on('pointerdown', () => {
+            console.log('bottomHUDがクリックされました！');
+            // ここにクリック時の処理を記述
+        });
     }
 
     // 現在のフロア情報を更新
