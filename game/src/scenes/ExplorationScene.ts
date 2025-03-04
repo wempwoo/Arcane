@@ -70,6 +70,10 @@ export class ExplorationScene extends Phaser.Scene {
         this.mapRenderer.updateState(this.map, this.currentNode);
         this.inputHandler.updateState(this.currentNode);
 
+        // 現在のノードの位置にカメラを移動
+        const cameraY = this.mapRenderer.calculateCameraY(this.currentNode) - 420; // なぜか420ずらすとちょうどいい
+        this.cameras.main.setScroll(0, cameraY);
+
         // フェードイン開始
         this.cameras.main.fadeIn(500, 0, 0, 0);
 
