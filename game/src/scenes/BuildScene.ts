@@ -381,8 +381,48 @@ export class BuildScene extends Scene {
     }
 
     private handleSlotClick(slotIndex: number) {
-        console.log(`Slot ${slotIndex} clicked`);
-        // TODO: 選択中の宝珠があれば装備、装備済みなら解除
+        console.log("Slot clicked:", slotIndex);
+        const slot = this.currentCircuit.slots[slotIndex];
+        
+        // スロットに宝珠が装備されている場合は解除
+        if (slot.orb) {
+            slot.orb = null;
+            this.scene.restart();
+            return;
+        }
+
+        // 宝珠が選択されていない場合は何もしない
+        if (!this.selectedOrb) {
+            return;
+        }
+
+        // マナ容量のチェック
+        const orbManaCost = this.getOrbManaCost(this.selectedOrb);
+        const totalManaCost = this.calculateTotalManaCost() + orbManaCost;
+        
+        if (totalManaCost > this.status.manaCapacity) {
+            // マナ容量超過の警告表示
+            const warningText = this.add.text(
+                this.cameras.main.centerX,
+                this.cameras.main.centerY - 50,
+                'マナ容量が不足しています',
+                {
+                    fontSize: '24px',
+                    color: '#ff0000',
+                }
+            ).setOrigin(0.5);
+
+            // 2秒後に警告を消去
+            this.time.delayedCall(2000, () => {
+                warningText.destroy();
+            });
+            return;
+        }
+
+        // 宝珠を装備
+        slot.orb = this.selectedOrb;
+        this.selectedOrb = null;
+        this.scene.restart();
     }
 
     private handleCircuitSelect(circuitId: string) {
@@ -390,14 +430,40 @@ export class BuildScene extends Scene {
         if (circuit) {
             this.currentCircuit = circuit;
             this.status.currentCircuit = circuit.name;
-            // シーンを再描画
+            this.selectedOrb = null; // 回路切り替え時に選択状態をリセット
             this.scene.restart();
         }
     }
 
     private handleOrbSelect(orb: string) {
-        console.log(`Orb ${orb} selected`);
-        // TODO: 宝珠の選択状態を管理
+        // 同じ宝珠を選択した場合は選択解除
+        if (this.selectedOrb === orb) {
+            this.selectedOrb = null;
+        } else {
+            this.selectedOrb = orb;
+        }
+        this.scene.restart();
+    }
+
+    private calculateTotalManaCost(): number {
+        return this.currentCircuit.slots.reduce((total, slot) => {
+            if (!slot.orb) return total;
+            return total + this.getOrbManaCost(slot.orb);
+        }, 0);
+    }
+
+    private getOrbManaCost(orb: string): number {
+        // 各宝珠のマナコスト（仮の実装）
+        switch (orb) {
+            case "マナの矢":
+                return 5;
+            case "ファイアボール":
+                return 10;
+            case "アイスシャード":
+                return 8;
+            default:
+                return 0;
+        }
     }
 
     private getMaxSlotX(): number {
