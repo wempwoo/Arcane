@@ -12,7 +12,7 @@ export class MapRenderer {
     private readonly LANE_WIDTH = 100; // スマートフォン画面に合わせて調整
     private readonly BASE_X = 195; // WORLD_WIDTHの半分
     private readonly WORLD_WIDTH = 390; // 一般的なスマートフォンの画面幅
-    private readonly WORLD_MARGIN = 100;
+    private readonly WORLD_MARGIN = -400;
 
     constructor(
         scene: Phaser.Scene,
@@ -38,18 +38,17 @@ export class MapRenderer {
     getNodeScreenPosition(node: Node): NodePosition {
         return {
             x: this.BASE_X + (node.lane - Lane.Center) * this.LANE_WIDTH,
-            y: -node.level * this.LEVEL_HEIGHT - this.WORLD_MARGIN
+            y: -(node.level * this.LEVEL_HEIGHT + this.WORLD_MARGIN)
         };
     }
 
     calculateInitialCameraY(node: Node): number {
-        return this.calculateCameraY(node) - 420;
+        return this.calculateCameraY(node);
     }
 
     calculateCameraY(node: Node): number {
         const levelOffset = node.level * this.LEVEL_HEIGHT;
-        const screenOffset = 100; // HUDを考慮したカメラの位置調整
-        return -levelOffset - screenOffset;
+        return -(levelOffset + this.WORLD_MARGIN);
     }
 
     findClosestNode(x: number, y: number): Node | null {

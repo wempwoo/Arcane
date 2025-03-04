@@ -61,9 +61,6 @@ export class ExplorationScene extends Phaser.Scene {
         // HUDの初期化
         this.hud = new HUD(this);
 
-        // カメラの初期位置を設定
-        this.cameras.main.setScroll(0, this.mapRenderer.calculateInitialCameraY(this.currentNode));
-
         // マップの状態を更新（戦闘からの復帰時に必要）
         this.mapRenderer.updateState(this.map, this.currentNode);
         this.inputHandler.updateState(this.currentNode);
