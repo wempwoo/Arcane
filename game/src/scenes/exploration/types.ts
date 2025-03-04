@@ -52,3 +52,35 @@ export interface NodePosition {
     x: number;
     y: number;
 }
+
+// 行動の定義
+export interface Action {
+    id: string;
+    name: string;
+    description: string;
+    icon?: string; // 将来的にアイコンを追加する際に使用
+}
+
+// ノードタイプごとの利用可能な行動
+export const NODE_ACTIONS: Record<NodeType, Action[]> = {
+    [NodeType.Basic]: [],
+    [NodeType.Battle]: [
+        {
+            id: 'fight',
+            name: '戦う',
+            description: '敵と戦闘を開始します'
+        },
+        {
+            id: 'sneak',
+            name: 'すり抜ける',
+            description: '敵に気づかれないように通り抜けます'
+        }
+    ],
+    [NodeType.SafeHaven]: [
+        {
+            id: 'build',
+            name: 'ビルド',
+            description: 'Arcaionのビルドを行います'
+        }
+    ]
+};

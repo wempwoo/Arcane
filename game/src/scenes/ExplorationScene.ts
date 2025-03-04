@@ -4,7 +4,8 @@ import { HUD } from './exploration/HUD';
 import { InputHandler } from './exploration/InputHandler';
 import { MapGenerator } from './exploration/MapGenerator';
 import { MapRenderer } from './exploration/MapRenderer';
-import { Node, NodeType } from './exploration/types';
+import { Action, Node, NodeType } from './exploration/types';
+import { ActionSelector } from './exploration/ActionSelector';
 
 export class ExplorationScene extends Phaser.Scene {
     private mapGenerator!: MapGenerator;
@@ -14,6 +15,7 @@ export class ExplorationScene extends Phaser.Scene {
     private currentNode!: Node;
     private readonly maxLevel: number = 10;
     private hud!: HUD;
+    private actionSelector!: ActionSelector;
     private isInitialized: boolean = false;
 
     constructor() {
@@ -61,6 +63,9 @@ export class ExplorationScene extends Phaser.Scene {
         // HUDの初期化
         this.hud = new HUD(this);
 
+        // 行動選択UIの初期化
+        this.actionSelector = new ActionSelector(this);
+
         // マップの状態を更新（戦闘からの復帰時に必要）
         this.mapRenderer.updateState(this.map, this.currentNode);
         this.inputHandler.updateState(this.currentNode);
@@ -75,17 +80,6 @@ export class ExplorationScene extends Phaser.Scene {
     private handleNodeSelected(node: Node): void {
         // ノードの状態を更新
         this.currentNode = node;
-        node.visited = true;
-
-        // 戦闘ノードの場合、戦闘シーンに遷移
-        if (node.type === NodeType.Battle) {
-            // フェードアウトしてから戦闘シーンへ
-            this.cameras.main.fadeOut(500, 0, 0, 0);
-            this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('BattleScene');
-            });
-            return;
-        }
 
         // コンポーネントの状態を更新
         this.mapRenderer.updateState(this.map, this.currentNode);
@@ -93,5 +87,49 @@ export class ExplorationScene extends Phaser.Scene {
 
         // マップを再描画
         this.mapRenderer.draw();
+
+        // 行動選択UIを表示（戦闘ノードまたは安全地帯の場合）
+        if (node.type === NodeType.Battle || node.type === NodeType.SafeHaven) {
+            this.inputHandler.disableInput(); // 入力を無効化
+            this.actionSelector.show(node, (action: Action) => {
+                this.handleActionSelected(action);
+            });
+        } else {
+            // 基本ノードの場合は即座に訪問済みにする
+            node.visited = true;
+            this.mapRenderer.updateState(this.map, this.currentNode);
+        }
+    }
+
+    private handleActionSelected(action: Action): void {
+        console.log(`Selected action: ${action.id}`);
+
+        // 行動選択UIを非表示
+        this.actionSelector.hide();
+        this.inputHandler.enableInput(); // 入力を再度有効化
+
+        switch (action.id) {
+            case 'fight':
+                // 戦闘シーンに遷移
+                this.cameras.main.fadeOut(500, 0, 0, 0);
+                this.cameras.main.once('camerafadeoutcomplete', () => {
+                    this.scene.start('BattleScene');
+                });
+                break;
+
+            case 'sneak':
+                // すり抜け成功時の処理
+                this.currentNode.visited = true;
+                this.mapRenderer.updateState(this.map, this.currentNode);
+                break;
+
+            case 'build':
+                // ビルドシーンに遷移
+                this.cameras.main.fadeOut(500, 0, 0, 0);
+                this.cameras.main.once('camerafadeoutcomplete', () => {
+                    this.scene.start('BuildScene');
+                });
+                break;
+        }
     }
 }

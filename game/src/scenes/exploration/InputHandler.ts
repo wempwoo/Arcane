@@ -8,6 +8,7 @@ export class InputHandler {
     private mapRenderer: MapRenderer;
     private currentNode: Node;
     private onNodeSelected: (node: Node) => void;
+    private inputEnabled: boolean = true;
 
     constructor(
         scene: Phaser.Scene,
@@ -27,6 +28,14 @@ export class InputHandler {
         this.currentNode = currentNode;
     }
 
+    enableInput(): void {
+        this.inputEnabled = true;
+    }
+
+    disableInput(): void {
+        this.inputEnabled = false;
+    }
+
     private setupInputHandling() {
         this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             const x = pointer.x + this.scene.cameras.main.scrollX;
@@ -36,6 +45,8 @@ export class InputHandler {
     }
 
     private handleNodeSelection(x: number, y: number) {
+        if (!this.inputEnabled) return;
+
         const clickedNode = this.mapRenderer.findClosestNode(x, y);
         
         if (clickedNode) {
