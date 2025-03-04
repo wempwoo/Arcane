@@ -81,6 +81,11 @@ export const NODE_ACTIONS: Record<NodeType, Action[]> = {
             id: 'build',
             name: 'ビルド',
             description: 'Arcaionのビルドを行います'
+        },
+        {
+            id: 'do_nothing',
+            name: '何もしない',
+            description: '何もしません'
         }
     ]
 };

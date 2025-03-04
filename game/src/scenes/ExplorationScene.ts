@@ -133,6 +133,9 @@ export class ExplorationScene extends Phaser.Scene {
                 this.cameras.main.once('camerafadeoutcomplete', () => {
                     this.scene.start('BuildScene');
                 });
+
+            case 'do_nothing':
+                // 何もしない
                 break;
         }
     }
