@@ -4,16 +4,16 @@ Phaser.js + CapacitorJSを使用したモバイルゲーム開発プロジェク
 
 ## プロジェクト構成
 
-- **フロントエンド** (`/game`): Phaser.js + TypeScript
+- **フロントエンド** (`/client`): Phaser.js + TypeScript
 - **バックエンド** (`/server`): Node.js + Express + TypeScript
 
 ## ローカル開発環境のセットアップ
 
-### フロントエンド (game)
+### フロントエンド (client)
 
 ```bash
 # 依存関係のインストール
-cd game
+cd client
 npm install
 
 # 開発サーバーの起動
@@ -55,7 +55,7 @@ npm run dev
 
 ```
 /
-├── game/               - フロントエンドコード
+├── client/             - フロントエンドコード
 │   ├── src/            - ソースコード
 │   │   ├── game.ts     - ゲームのメインファイル
 │   │   ├── services/   - サービス（API通信など）
@@ -93,7 +93,7 @@ npm run dev
 ### Webビルド
 
 ```bash
-cd game
+cd client
 npm run build
 ```
 
@@ -101,7 +101,7 @@ npm run build
 
 ```bash
 # Capacitorの初期化とプラットフォーム追加
-cd game
+cd client
 npm run cap:init
 npm run cap:add:android
 npm run cap:add:ios
