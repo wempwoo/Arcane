@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ArcaneBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(ArcaneDbContext))]
-    [Migration("20250305235608_InitialCreate")]
+    [Migration("20250306000524_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

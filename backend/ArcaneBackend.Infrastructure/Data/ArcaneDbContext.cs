@@ -28,31 +28,7 @@ public class ArcaneDbContext : DbContext
     /// <param name="modelBuilder">モデルビルダー</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Player>(entity =>
-        {
-            // テーブル名を小文字で指定
-            entity.ToTable("players");
-
-            entity.HasKey(e => e.Id);
-
-            entity.HasIndex(e => e.DeviceId)
-                .IsUnique();
-
-            entity.Property(e => e.DeviceId)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            entity.Property(e => e.Nickname)
-                .HasMaxLength(20);
-
-            entity.Property(e => e.LastLoginAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
-        });
+        // 同じアセンブリ内のすべてのEntityTypeConfigurationを適用
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ArcaneDbContext).Assembly);
     }
 }
