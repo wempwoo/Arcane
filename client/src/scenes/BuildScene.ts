@@ -1,6 +1,6 @@
 import { Scene } from 'phaser';
 
-interface ArcaionStatus {
+interface ArcMachineStatus {
     name: string;
     hp: number;
     manaCapacity: number;
@@ -22,7 +22,7 @@ interface Circuit {
 }
 
 export class BuildScene extends Scene {
-    private status: ArcaionStatus = {
+    private status: ArcMachineStatus = {
         name: "テスト魔導機",
         hp: 1000,
         manaCapacity: 100,

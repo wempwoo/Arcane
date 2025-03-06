@@ -29,7 +29,7 @@ export interface Path<L extends Lane = Lane> {
 export const enum NodeType {
     Basic = 'basic',
     Battle = 'battle',
-    SafeHaven = 'safe_haven' // 安全地帯ノード - Arcaionのビルドが可能な特別なノード
+    SafeHaven = 'safe_haven'
 }
 
 // ノードの定義
@@ -80,7 +80,7 @@ export const NODE_ACTIONS: Record<NodeType, Action[]> = {
         {
             id: 'build',
             name: 'ビルド',
-            description: 'Arcaionのビルドを行います'
+            description: '魔導機のビルドを行います'
         },
         {
             id: 'do_nothing',
