@@ -8,16 +8,16 @@ interface ArcMachineStatus {
     currentCircuit: string;
 }
 
-interface CircuitSlot {
+interface ArcCircuitSlot {
     x: number;
     y: number;
     orb: string | null;
 }
 
-interface Circuit {
+interface ArcCircuit {
     id: string;
     name: string;
-    slots: CircuitSlot[];
+    slots: ArcCircuitSlot[];
     startPoint: { x: number; y: number };
 }
 
@@ -30,7 +30,7 @@ export class BuildScene extends Scene {
         currentCircuit: "基本回路"
     };
 
-    private circuits: Circuit[] = [
+    private circuits: ArcCircuit[] = [
         {
             id: "circuit1",
             name: "基本回路",
@@ -44,7 +44,7 @@ export class BuildScene extends Scene {
     ];
 
     private orbs: string[] = ["マナの矢", "ファイアボール", "アイスシャード"];
-    private currentCircuit!: Circuit;
+    private currentCircuit!: ArcCircuit;
     private selectedOrb: string | null = null;
 
     constructor() {
@@ -382,7 +382,7 @@ export class BuildScene extends Scene {
 
     private handleSlotClick(slotIndex: number) {
         console.log("Slot clicked:", slotIndex);
-        const slot = this.currentCircuit.slots[slotIndex];
+        const slot: ArcCircuitSlot = this.currentCircuit.slots[slotIndex];
         
         // スロットに宝珠が装備されている場合は解除
         if (slot.orb) {
@@ -446,7 +446,7 @@ export class BuildScene extends Scene {
     }
 
     private calculateTotalManaCost(): number {
-        return this.currentCircuit.slots.reduce((total, slot) => {
+        return this.currentCircuit.slots.reduce((total: number, slot: ArcCircuitSlot) => {
             if (!slot.orb) return total;
             return total + this.getOrbManaCost(slot.orb);
         }, 0);
@@ -467,10 +467,10 @@ export class BuildScene extends Scene {
     }
 
     private getMaxSlotX(): number {
-        return Math.max(...this.currentCircuit.slots.map(slot => slot.x));
+        return Math.max(...this.currentCircuit.slots.map((slot: ArcCircuitSlot) => slot.x));
     }
 
     private getMaxSlotY(): number {
-        return Math.max(...this.currentCircuit.slots.map(slot => slot.y));
+        return Math.max(...this.currentCircuit.slots.map((slot: ArcCircuitSlot) => slot.y));
     }
 }
