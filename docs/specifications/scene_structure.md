@@ -28,10 +28,10 @@
    - 遷移先：探索シーン
    - 詳細仕様：「battle_scene.md」を参照
 
-4. **Arcaionビルドシーン**
+4. **魔導機ビルドシーン**
    - 魔導機の装備調整を行うシーン
    - 遷移先：探索シーン
-   - 詳細仕様：「arcaion_build_scene.md」を参照
+   - 詳細仕様：「arc_machine_build_scene.md」を参照
 
 ## 共通仕様
 
