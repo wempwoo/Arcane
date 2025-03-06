@@ -38,17 +38,6 @@ public class ArcCircuit
     public DateTime UpdatedAt { get; set; }
 
     /// <summary>
-    /// 回路の開始スロットのID
-    /// </summary>
-    public Guid StartSlotId { get; set; }
-
-    /// <summary>
-    /// 回路の開始スロット。
-    /// ここから魔力が流れ始め、接続された次のスロットへと伝播していきます。
-    /// </summary>
-    public ArcOrbSlot StartSlot { get; set; } = null!;
-
-    /// <summary>
     /// この回路を装備している魔導機のID。
     /// nullの場合は未装備状態を表します。
     /// </summary>
@@ -59,4 +48,10 @@ public class ArcCircuit
     /// 魔導回路は最大で1つの魔導機に装備可能です。
     /// </summary>
     public ArcMachine? Machine { get; set; }
+
+    /// <summary>
+    /// この回路のスロット一覧。
+    /// 必ず1つの開始点（IsStartPoint = true）を持ちます。
+    /// </summary>
+    public ICollection<ArcOrbSlot> Slots { get; set; } = new List<ArcOrbSlot>();
 }

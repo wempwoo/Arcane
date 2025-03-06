@@ -12,6 +12,12 @@ public class ArcOrbSlot
     public Guid Id { get; set; }
 
     /// <summary>
+    /// このスロットが魔力の開始点かどうか。
+    /// 各回路には必ず1つの開始点が存在します。
+    /// </summary>
+    public bool IsStartPoint { get; set; }
+
+    /// <summary>
     /// このスロットが属する魔導回路のID
     /// </summary>
     public Guid CircuitId { get; set; }

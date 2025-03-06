@@ -8,7 +8,7 @@ public class Player
     /// <summary>
     /// プレイヤーの一意識別子
     /// </summary>
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     
     /// <summary>
     /// デバイスの一意識別子
