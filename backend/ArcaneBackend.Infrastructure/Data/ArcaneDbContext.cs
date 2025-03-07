@@ -17,6 +17,8 @@ public class ArcaneDbContext : DbContext
     public DbSet<ArcOrb> ArcOrbs { get; set; } = null!;
     public DbSet<ArcOrbSlot> ArcOrbSlots { get; set; } = null!;
     public DbSet<SlotConnection> SlotConnections { get; set; } = null!;
+    public DbSet<ExplorationNode> ExplorationNodes { get; set; } = null!;
+    public DbSet<ExplorationPathway> ExplorationPathways { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,5 +31,7 @@ public class ArcaneDbContext : DbContext
         modelBuilder.ApplyConfiguration(new ArcOrbConfiguration());
         modelBuilder.ApplyConfiguration(new ArcOrbSlotConfiguration());
         modelBuilder.ApplyConfiguration(new SlotConnectionConfiguration());
+        modelBuilder.ApplyConfiguration(new ExplorationNodeConfiguration());
+        modelBuilder.ApplyConfiguration(new ExplorationPathwayConfiguration());
     }
 }
