@@ -28,8 +28,8 @@ namespace ArcaneBackend.Core.Models
 
     public class MapPath
     {
-        public MapNode FromNode { get; set; }
-        public MapNode ToNode { get; set; }
+        public required MapNode FromNode { get; set; }
+        public required MapNode ToNode { get; set; }
     }
 
     public class ExplorationMap
@@ -48,7 +48,7 @@ namespace ArcaneBackend.Core.Models
             _nodes.Add(GetNodeKey(node.Level, node.Lane), node);
         }
 
-        public MapNode GetNode(int level, Lane lane)
+        public MapNode? GetNode(int level, Lane lane)
         {
             return _nodes.TryGetValue(GetNodeKey(level, lane), out var node) ? node : null;
         }

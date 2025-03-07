@@ -37,12 +37,12 @@ namespace ArcaneBackend.API.Models
         /// <summary>
         /// マップの一意識別子
         /// </summary>
-        public string MapId { get; set; }
+        public required string MapId { get; set; }
 
         /// <summary>
         /// マップを構成するノード群
         /// </summary>
-        public List<ExplorationNodeResponse> Nodes { get; set; }
+        public List<ExplorationNodeResponse> Nodes { get; set; } = new();
     }
 
     /// <summary>
@@ -63,12 +63,12 @@ namespace ArcaneBackend.API.Models
         /// <summary>
         /// ノードのレーン位置
         /// </summary>
-        public string Lane { get; set; }
+        public required string Lane { get; set; }
 
         /// <summary>
         /// ノードの種類
         /// </summary>
-        public string Type { get; set; }
+        public required string Type { get; set; }
 
         /// <summary>
         /// 訪問済みかどうか
@@ -78,7 +78,7 @@ namespace ArcaneBackend.API.Models
         /// <summary>
         /// このノードから出ていくパス情報
         /// </summary>
-        public List<ExplorationPathResponse> OutgoingPaths { get; set; }
+        public List<ExplorationPathResponse> OutgoingPaths { get; set; } = new();
     }
 
     /// <summary>
