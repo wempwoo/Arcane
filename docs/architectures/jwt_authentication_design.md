@@ -87,10 +87,28 @@ sequenceDiagram
 
 ## 実装のポイント
 
-### 1. デバイス識別
-- iOS: IDFV (identifierForVendor)
-- Android: Android ID
-- 端末初期化時の考慮：新規ユーザーとして扱う
+### 1. デバイス識別（Capacitor + ブラウザ）
+
+#### Web環境
+- ブラウザストレージベース
+  - LocalStorage: プライマリストレージ
+  - IndexedDB: バックアップストレージ
+- フィンガープリント技術の利用
+  - Canvas指紋
+  - WebGL情報
+  - ブラウザ/OS情報
+
+#### ネイティブ環境（Capacitor）
+- Device API活用
+  - iOS: Capacitor Device APIでIDFVを取得
+  - Android: Capacitor Device APIでAndroid IDを取得
+- Preferences APIでの永続化
+  - @capacitor/preferences for セキュアストレージ
+
+#### フォールバック戦略
+1. Capacitor Device API試行
+2. 失敗時はブラウザベースの識別子を使用
+3. どちらも失敗時は新規ID生成
 
 ### 2. トークン管理
 - トークン保存：デバイスのSecure Storage利用
@@ -115,7 +133,7 @@ POST /api/auth/device
 Request:
 {
     "deviceId": "encrypted-device-identifier",
-    "deviceType": "ios|android"
+    "deviceType": "ios|android|web"
 }
 Response:
 {
