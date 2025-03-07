@@ -19,7 +19,7 @@ namespace ArcaneBackend.Core.Services
             var map = new ExplorationMap(Guid.NewGuid().ToString());
 
             // 開始ノードを生成（中央レーン）
-            var startNode = CreateNode(0, Lane.Center);
+            var startNode = CreateNode(0, Lane.Center, NodeType.Basic);
             map.AddNode(startNode);
 
             // レベル1からmaxLevel-1まで生成
@@ -40,10 +40,10 @@ namespace ArcaneBackend.Core.Services
         private void GenerateFinalLevel(ExplorationMap map, int currentLevel)
         {
             // 最後のレベルは終了ノード（中央レーン）への接続のみ
-            var endNode = CreateNode(currentLevel + 1, Lane.Center);
+            var endNode = CreateNode(currentLevel + 1, Lane.Center, NodeType.Basic);
             map.AddNode(endNode);
 
-            var currentNodes = map.GetNodesAtLevel(currentLevel);
+            var currentNodes = map.GetNodesAtLevel(currentLevel).ToList();
             foreach (var node in currentNodes)
             {
                 if (Math.Abs((int)node.Lane - (int)Lane.Center) <= 1)
@@ -56,51 +56,60 @@ namespace ArcaneBackend.Core.Services
         private void GenerateLevel(ExplorationMap map, int currentLevel)
         {
             // 現在のレベルの各ノードから次のレベルへのパスを生成
-            var currentNodes = map.GetNodesAtLevel(currentLevel);
-            foreach (var node in currentNodes)
+            var currentNodes = map.GetNodesAtLevel(currentLevel).ToList();
+            var newNodes = new List<MapNode>();
+            var nodePaths = new List<(MapNode From, MapNode To)>();
+
+            foreach (var currentNode in currentNodes)
             {
-                var paths = GeneratePaths(node.Lane);
+                var paths = GeneratePaths(currentNode.Lane);
                 foreach (var (fromLane, direction) in paths)
                 {
                     var targetLane = GetTargetLane(fromLane, direction);
-                    var targetNode = map.GetNode(currentLevel + 1, targetLane);
+                    var nextNode = map.GetNode(currentLevel + 1, targetLane);
 
-                    if (targetNode == null)
+                    if (nextNode == null)
                     {
-                        targetNode = CreateNode(currentLevel + 1, targetLane);
-                        map.AddNode(targetNode);
+                        nextNode = CreateNode(currentLevel + 1, targetLane);
+                        newNodes.Add(nextNode);
+                        map.AddNode(nextNode);
                     }
 
-                    CreatePath(node, targetNode);
+                    nodePaths.Add((currentNode, nextNode));
                 }
+            }
+
+            // パスを作成
+            foreach (var (from, to) in nodePaths)
+            {
+                CreatePath(from, to);
             }
 
             // 中央レーンのノードが存在しない場合は生成
             var centerNode = map.GetNode(currentLevel + 1, Lane.Center);
-            if (centerNode == null)
+            if (centerNode == null && !newNodes.Any(n => n.Lane == Lane.Center))
             {
                 centerNode = CreateNode(currentLevel + 1, Lane.Center);
-                map.AddNode(centerNode);
+                newNodes.Add(centerNode);
 
                 // 前のレベルの最も近いノードから接続
-                var prevNodes = map.GetNodesAtLevel(currentLevel);
-                if (prevNodes.Any())
+                if (currentNodes.Any())
                 {
-                    var closestNode = prevNodes
+                    var closestNode = currentNodes
                         .OrderBy(n => Math.Abs((int)n.Lane - (int)Lane.Center))
                         .First();
-                    CreatePath(closestNode, centerNode);
+                    nodePaths.Add((closestNode, centerNode));
                 }
             }
         }
 
-        private MapNode CreateNode(int level, Lane lane)
+        private MapNode CreateNode(int level, Lane lane, NodeType? type = null)
         {
             return new MapNode
             {
                 Level = level,
                 Lane = lane,
-                Type = DetermineNodeType(level),
+                Type = type ?? DetermineNodeType(level),
                 OutgoingPaths = new List<MapPath>(),
                 IncomingPaths = new List<MapPath>()
             };
