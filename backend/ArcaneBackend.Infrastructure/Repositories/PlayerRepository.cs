@@ -62,4 +62,15 @@ public class PlayerRepository : IPlayerRepository
     {
         return await _context.Players.AnyAsync(p => p.Id == id);
     }
+
+    public async Task<Player?> GetByDeviceIdAsync(string deviceId)
+    {
+        return await _context.Players
+            .FirstOrDefaultAsync(p => p.DeviceId == deviceId);
+    }
+
+    public async Task<bool> ExistsByDeviceIdAsync(string deviceId)
+    {
+        return await _context.Players.AnyAsync(p => p.DeviceId == deviceId);
+    }
 }

@@ -1,3 +1,5 @@
+using ArcaneBackend.Core.Enums;
+
 namespace ArcaneBackend.Core.Entities;
 
 /// <summary>
@@ -14,6 +16,11 @@ public class Player
     /// デバイスの一意識別子
     /// </summary>
     public required string DeviceId { get; set; }
+
+    /// <summary>
+    /// デバイスの種類
+    /// </summary>
+    public required DeviceType DeviceType { get; set; }
     
     /// <summary>
     /// プレイヤーのニックネーム
