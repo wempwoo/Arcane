@@ -1,5 +1,6 @@
 using ArcaneBackend.API.Controllers;
 using ArcaneBackend.Core.Entities;
+using ArcaneBackend.Core.Enums;
 using ArcaneBackend.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -25,8 +26,8 @@ public class PlayersControllerTests
         // Arrange
         var expectedPlayers = new List<Player>
         {
-            new() { Id = _testPlayerId, DeviceId = "device1", Nickname = "Player1" },
-            new() { Id = Guid.NewGuid(), DeviceId = "device2", Nickname = "Player2" }
+            new() { Id = _testPlayerId, DeviceId = "device1", Nickname = "Player1", DeviceType = DeviceType.Web },
+            new() { Id = Guid.NewGuid(), DeviceId = "device2", Nickname = "Player2", DeviceType = DeviceType.Android }
         };
         _mockRepo.Setup(repo => repo.GetAllAsync())
             .ReturnsAsync(expectedPlayers);
@@ -45,7 +46,7 @@ public class PlayersControllerTests
     public async Task GetPlayer_WithValidId_ReturnsPlayer()
     {
         // Arrange
-        var expectedPlayer = new Player { Id = _testPlayerId, DeviceId = "device1", Nickname = "Player1" };
+        var expectedPlayer = new Player { Id = _testPlayerId, DeviceId = "device1", Nickname = "Player1", DeviceType = DeviceType.Web };
         _mockRepo.Setup(repo => repo.GetByIdAsync(_testPlayerId))
             .ReturnsAsync(expectedPlayer);
 
@@ -78,8 +79,8 @@ public class PlayersControllerTests
     public async Task CreatePlayer_WithValidPlayer_ReturnsCreatedAtAction()
     {
         // Arrange
-        var playerToCreate = new Player { DeviceId = "device1", Nickname = "Player1" };
-        var createdPlayer = new Player { Id = _testPlayerId, DeviceId = "device1", Nickname = "Player1" };
+        var playerToCreate = new Player { DeviceId = "device1", Nickname = "Player1", DeviceType = DeviceType.Web };
+        var createdPlayer = new Player { Id = _testPlayerId, DeviceId = "device1", Nickname = "Player1", DeviceType = DeviceType.Web };
         _mockRepo.Setup(repo => repo.AddAsync(It.IsAny<Player>()))
             .ReturnsAsync(createdPlayer);
 
@@ -98,7 +99,7 @@ public class PlayersControllerTests
     public async Task UpdatePlayer_WithValidIdAndPlayer_ReturnsOkResult()
     {
         // Arrange
-        var playerToUpdate = new Player { Id = _testPlayerId, DeviceId = "device1", Nickname = "UpdatedPlayer" };
+        var playerToUpdate = new Player { Id = _testPlayerId, DeviceId = "device1", Nickname = "UpdatedPlayer", DeviceType = DeviceType.Web };
         _mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<Player>()))
             .ReturnsAsync(playerToUpdate);
 
