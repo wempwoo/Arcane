@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import { HUD } from './exploration/HUD';
 import { InputHandler } from './exploration/InputHandler';
 import { MapRenderer } from './exploration/MapRenderer';
-import { Action, Node, NodeType, ExplorationMapData, convertBackendNode } from './exploration/types';
+import { Action, Node, NodeType, ExplorationMapData, ExplorationNodeData, convertBackendNode } from './exploration/types';
 import { ActionSelector } from './exploration/ActionSelector';
 import { ExplorationMapAPI } from './exploration/api';
 
@@ -49,10 +49,16 @@ export class ExplorationScene extends Phaser.Scene {
                 // バックエンドでマップを生成
                 const mapData = await ExplorationMapAPI.generateMap(this.maxLevel);
 
+                // ノードデータのマップを作成
+                const nodeMap = new Map<number, ExplorationNodeData>();
+                mapData.nodes.forEach(nodeData => {
+                    nodeMap.set(nodeData.id, nodeData);
+                });
+
                 // マップデータを内部形式に変換
                 this.map = new Map();
                 mapData.nodes.forEach(nodeData => {
-                    const node = convertBackendNode(nodeData);
+                    const node = convertBackendNode(nodeData, nodeMap);
                     this.map.set(`${node.level},${node.lane}`, node);
                 });
 

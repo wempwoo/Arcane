@@ -69,7 +69,7 @@ export interface NodeConnection {
 }
 
 // バックエンドのデータを内部形式に変換するユーティリティ関数
-export function convertBackendNode(data: ExplorationNodeData): Node {
+export function convertBackendNode(data: ExplorationNodeData, nodeMap: Map<number, ExplorationNodeData>): Node {
     return {
         id: data.id,
         level: data.level,
@@ -81,12 +81,13 @@ export function convertBackendNode(data: ExplorationNodeData): Node {
         type: data.type.toLowerCase() as NodeType,
         visited: data.visited,
         connections: data.outgoingPaths.map(path => {
-            const targetNode = data.outgoingPaths.find(p => p.toNodeId === path.toNodeId);
-            if (!targetNode) throw new Error(`Invalid path: ${path.toNodeId}`);
+            const targetNode = nodeMap.get(path.toNodeId);
+            if (!targetNode) throw new Error(`Invalid path: target node ${path.toNodeId} not found`);
             return {
                 targetId: path.toNodeId,
-                targetLevel: data.level + 1, // レベルは現在のノードの次のレベル
-                targetLane: parseInt(data.lane) as Lane // レーンは接続先ノードと同じ
+                targetLevel: targetNode.level,
+                targetLane: targetNode.lane === 'Left' ? Lane.Left :
+                          targetNode.lane === 'Right' ? Lane.Right : Lane.Center
             };
         })
     };
