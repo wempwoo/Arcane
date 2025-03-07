@@ -91,6 +91,7 @@ builder.Services.AddDbContext<ArcaneDbContext>(options =>
 
 // Add Repositories
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
+builder.Services.AddScoped<IExplorationMapService, ExplorationMapService>();
 
 var app = builder.Build();
 
