@@ -73,7 +73,11 @@ export function convertBackendNode(data: ExplorationNodeData): Node {
     return {
         id: data.id,
         level: data.level,
-        lane: parseInt(data.lane) as Lane,
+        lane: {
+            'Left': Lane.Left,
+            'Center': Lane.Center,
+            'Right': Lane.Right
+        }[data.lane] ?? Lane.Center,
         type: data.type.toLowerCase() as NodeType,
         visited: data.visited,
         connections: data.outgoingPaths.map(path => {
