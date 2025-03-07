@@ -40,6 +40,7 @@
 - プレイヤー情報のCRUD操作
 - 魔導機の基本操作
 - JWT認証の基本実装
+  - 参照: docs\architectures\jwt_authentication_design.md
 - Swagger UIでのAPI文書化
 
 ## フェーズ3: Docker環境の準備
