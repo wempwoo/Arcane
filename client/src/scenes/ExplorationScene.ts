@@ -2,13 +2,12 @@ import Phaser from 'phaser';
 
 import { HUD } from './exploration/HUD';
 import { InputHandler } from './exploration/InputHandler';
-import { MapGenerator } from './exploration/MapGenerator';
 import { MapRenderer } from './exploration/MapRenderer';
-import { Action, Node, NodeType } from './exploration/types';
+import { Action, Node, NodeType, ExplorationMapData, convertBackendNode } from './exploration/types';
 import { ActionSelector } from './exploration/ActionSelector';
+import { ExplorationMapAPI } from './exploration/api';
 
 export class ExplorationScene extends Phaser.Scene {
-    private mapGenerator!: MapGenerator;
     private mapRenderer!: MapRenderer;
     private inputHandler!: InputHandler;
     private map!: Map<string, Node>;
@@ -17,6 +16,8 @@ export class ExplorationScene extends Phaser.Scene {
     private hud!: HUD;
     private actionSelector!: ActionSelector;
     private isInitialized: boolean = false;
+    private loadingText?: Phaser.GameObjects.Text;
+    private errorText?: Phaser.GameObjects.Text;
 
     constructor() {
         super({ key: 'ExplorationScene' });
@@ -24,31 +25,72 @@ export class ExplorationScene extends Phaser.Scene {
 
     public init(data: { battleResult?: 'victory' | 'defeat' }): void {
         // 戦闘シーンからの戻り時の処理
-        if (data.battleResult === 'victory') {
+        if (data.battleResult === 'victory' && this.currentNode) {
             // 戦闘に勝利した場合、現在のノードを訪問済みにマーク
-            if (this.currentNode) {
-                this.currentNode.visited = true;
-                // マップの状態を更新
-                this.mapRenderer?.updateState(this.map, this.currentNode);
-                this.inputHandler?.updateState(this.currentNode);
-            }
+            this.currentNode.visited = true;
+            // マップの状態を更新
+            this.mapRenderer?.updateState(this.map, this.currentNode);
+            this.inputHandler?.updateState(this.currentNode);
         }
     }
 
-    public create(): void {
+    private async initializeMap(): Promise<boolean> {
+        try {
+            if (!this.isInitialized) {
+                // ローディングテキストを表示
+                const centerX = this.cameras.main.centerX;
+                const centerY = this.cameras.main.centerY;
+                
+                this.loadingText = this.add.text(centerX, centerY, 'マップを生成中...', {
+                    fontSize: '24px',
+                    color: '#ffffff'
+                }).setOrigin(0.5).setDepth(1000);
+
+                // バックエンドでマップを生成
+                const mapData = await ExplorationMapAPI.generateMap(this.maxLevel);
+
+                // マップデータを内部形式に変換
+                this.map = new Map();
+                mapData.nodes.forEach(nodeData => {
+                    const node = convertBackendNode(nodeData);
+                    this.map.set(`${node.level},${node.lane}`, node);
+                });
+
+                // 開始ノードを設定
+                this.currentNode = this.getNode(0, 1)!; // Lane.Center = 1
+                this.currentNode.visited = true;
+                
+                this.isInitialized = true;
+            }
+            return true;
+        } catch (error) {
+            console.error('Failed to generate map:', error);
+            return false;
+        }
+    }
+
+    public async create(): Promise<void> {
+        // マップの初期化（初回のみ）
         if (!this.isInitialized) {
-            // 初回のみマップを生成
-            this.mapGenerator = new MapGenerator(this.maxLevel);
-            this.map = this.mapGenerator.generateMap();
-            
-            // 開始ノードを設定
-            this.currentNode = this.mapGenerator.getNode(0, 1)!; // Lane.Center = 1
-            this.currentNode.visited = true;
-            
-            this.isInitialized = true;
+            const success = await this.initializeMap();
+            if (!success) {
+                const centerX = this.cameras.main.centerX;
+                const centerY = this.cameras.main.centerY;
+                this.errorText = this.add.text(centerX, centerY, 'マップの生成に失敗しました。\nタイトルに戻ります。', {
+                    fontSize: '16px',
+                    color: '#ff0000'
+                }).setOrigin(0.5).setDepth(1000);
+                
+                // 3秒後にタイトルに戻る
+                this.time.delayedCall(3000, () => {
+                    this.scene.start('TitleScene');
+                });
+                return;
+            }
+            this.loadingText?.destroy();
         }
 
-        // レンダラーの初期化（毎回必要）
+        // レンダラーの初期化
         this.mapRenderer = new MapRenderer(this, this.map, this.currentNode);
         this.mapRenderer.setupCamera(this, this.maxLevel);
 
@@ -66,7 +108,7 @@ export class ExplorationScene extends Phaser.Scene {
         // 行動選択UIの初期化
         this.actionSelector = new ActionSelector(this);
 
-        // マップの状態を更新（戦闘からの復帰時に必要）
+        // マップの状態を更新（別シーンからの復帰時に必要）
         this.mapRenderer.updateState(this.map, this.currentNode);
         this.inputHandler.updateState(this.currentNode);
 
@@ -79,6 +121,10 @@ export class ExplorationScene extends Phaser.Scene {
 
         // 初期描画
         this.mapRenderer.draw();
+    }
+
+    private getNode(level: number, lane: number): Node | undefined {
+        return this.map.get(`${level},${lane}`);
     }
 
     private handleNodeSelected(node: Node): void {

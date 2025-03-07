@@ -18,7 +18,8 @@ namespace ArcaneBackend.API.Controllers
     /// - プレイヤーの進行状況に応じた動的なマップ調整
     /// - マップ内の特殊イベントの管理
     /// </remarks>
-    [Authorize]
+    // TODO: 認証を実装したら[Authorize]を有効化する
+    // [Authorize]
     [ApiController]
     [Route("api/exploration-maps")]
     public class ExplorationMapController : ControllerBase
