@@ -85,23 +85,6 @@ namespace ArcaneBackend.Core.Services
             {
                 CreatePath(from, to);
             }
-
-            // 中央レーンのノードが存在しない場合は生成
-            var centerNode = map.GetNode(currentLevel + 1, Lane.Center);
-            if (centerNode == null && !newNodes.Any(n => n.Lane == Lane.Center))
-            {
-                centerNode = CreateNode(currentLevel + 1, Lane.Center);
-                newNodes.Add(centerNode);
-
-                // 前のレベルの最も近いノードから接続
-                if (currentNodes.Any())
-                {
-                    var closestNode = currentNodes
-                        .OrderBy(n => Math.Abs((int)n.Lane - (int)Lane.Center))
-                        .First();
-                    nodePaths.Add((closestNode, centerNode));
-                }
-            }
         }
 
         private MapNode CreateNode(int level, Lane lane, NodeType? type = null)
