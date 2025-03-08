@@ -3,6 +3,7 @@ import { BattleScene } from './scenes/BattleScene';
 import { BuildScene } from './scenes/BuildScene';
 import { ExplorationScene } from './scenes/ExplorationScene';
 import { TitleScene } from './scenes/TitleScene';
+import { ErrorHandlingScene } from './scenes/ErrorHandlingScene';
 
 // ゲーム設定
 const config: Phaser.Types.Core.GameConfig = {
@@ -15,7 +16,13 @@ const config: Phaser.Types.Core.GameConfig = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
-    scene: [TitleScene, ExplorationScene, BattleScene, BuildScene]
+    scene: [
+        ErrorHandlingScene,  // エラーハンドリングシーンを最初に追加
+        TitleScene, 
+        ExplorationScene, 
+        BattleScene, 
+        BuildScene
+    ]
 };
 
 // ゲームインスタンスの作成
