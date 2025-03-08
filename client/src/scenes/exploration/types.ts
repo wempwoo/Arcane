@@ -46,9 +46,9 @@ export interface Path<L extends Lane = Lane> {
 
 // ノードタイプの定義
 export const enum NodeType {
-    Basic = 'basic',
-    Battle = 'battle',
-    SafeHaven = 'safe_haven'
+    Basic = 'Basic',
+    Battle = 'Battle',
+    SafeHaven = 'SafeHaven'
 }
 
 // ノードの定義
@@ -78,7 +78,7 @@ export function convertBackendNode(data: ExplorationNodeData, nodeMap: Map<numbe
             'Center': Lane.Center,
             'Right': Lane.Right
         }[data.lane] ?? Lane.Center,
-        type: data.type.toLowerCase() as NodeType,
+        type: data.type as NodeType,
         visited: data.visited,
         connections: data.outgoingPaths.map(path => {
             const targetNode = nodeMap.get(path.toNodeId);

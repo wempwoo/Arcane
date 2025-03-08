@@ -134,7 +134,7 @@ namespace ArcaneBackend.Core.Services
             var random = _random.NextDouble();
             if (random < 0.3)
                 return NodeType.Battle;
-            else if (random < 0.4)
+            else if (random < 0.7)
                 return NodeType.SafeHaven;
             else
                 return NodeType.Basic;
