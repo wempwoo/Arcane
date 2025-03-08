@@ -48,5 +48,9 @@
     "webpack": "^5.98.0",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.0"
+  },
+  "dependencies": {
+    "@capacitor/device": "^7.0.0",
+    "@capacitor/preferences": "^7.0.0"
   }
 }
