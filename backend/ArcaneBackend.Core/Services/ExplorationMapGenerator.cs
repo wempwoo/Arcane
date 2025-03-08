@@ -59,10 +59,11 @@ namespace ArcaneBackend.Core.Services
             var currentNodes = map.GetNodesAtLevel(currentLevel).ToList();
             var newNodes = new List<MapNode>();
             var nodePaths = new List<(MapNode From, MapNode To)>();
+            var isSingleNode = currentNodes.Count == 1;
 
             foreach (var currentNode in currentNodes)
             {
-                var paths = GeneratePaths(currentNode.Lane);
+                var paths = GeneratePaths(currentNode.Lane, isSingleNode);
                 foreach (var (fromLane, direction) in paths)
                 {
                     var targetLane = GetTargetLane(fromLane, direction);
@@ -151,7 +152,7 @@ namespace ArcaneBackend.Core.Services
             };
         }
 
-        private List<(Lane FromLane, PathDirection Direction)> GeneratePaths(Lane fromLane)
+        private List<(Lane FromLane, PathDirection Direction)> GeneratePaths(Lane fromLane, bool isSingleNode)
         {
             var paths = new List<(Lane, PathDirection)>();
             var possibleDirections = GetPossibleDirections(fromLane);
@@ -160,8 +161,8 @@ namespace ArcaneBackend.Core.Services
             var mainDirection = possibleDirections[_random.Next(possibleDirections.Count)];
             paths.Add((fromLane, mainDirection));
 
-            // 50%の確率で追加のパスを生成
-            if (_random.NextDouble() < 0.5)
+            // 当該レベルに1つしかノードが無い or 50%の確率で追加のパスを生成
+            if (isSingleNode || _random.NextDouble() < 0.5)
             {
                 var remainingDirections = possibleDirections.Where(d => d != mainDirection).ToList();
                 if (remainingDirections.Any())
