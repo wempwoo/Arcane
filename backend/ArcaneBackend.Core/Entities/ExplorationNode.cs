@@ -24,6 +24,7 @@ namespace ArcaneBackend.Core.Entities
         public NodeType Type { get; set; }
         public bool Visited { get; set; }
         public required string ExplorationMapId { get; set; } // マップの一意識別子
+        public Guid PlayerId { get; set; } // マップを所有するプレイヤーのID
         
         // 接続情報
         public ICollection<ExplorationPathway> OutgoingPaths { get; set; } = new List<ExplorationPathway>();

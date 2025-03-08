@@ -195,6 +195,9 @@ namespace ArcaneBackend.Infrastructure.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 

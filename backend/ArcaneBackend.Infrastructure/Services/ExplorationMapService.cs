@@ -21,13 +21,13 @@ namespace ArcaneBackend.Infrastructure.Services
             _generator = new ExplorationMapGenerator();
         }
 
-        public async Task<string> GenerateMapAsync(int maxLevel)
+        public async Task<string> GenerateMapAsync(int maxLevel, Guid playerId)
         {
             // マップを生成
             var map = _generator.Generate(maxLevel);
 
             // 生成されたマップをエンティティに変換
-            var (nodes, pathways) = ConvertToEntities(map);
+            var (nodes, pathways) = ConvertToEntities(map, playerId);
 
             // データベースに保存
             await _context.ExplorationNodes.AddRangeAsync(nodes);
@@ -37,28 +37,34 @@ namespace ArcaneBackend.Infrastructure.Services
             return map.Id;
         }
 
-        public async Task<ExplorationNode[]> GetMapNodesAsync(string explorationMapId)
+        public async Task<ExplorationNode[]> GetMapNodesAsync(string explorationMapId, Guid playerId)
         {
             return await _context.ExplorationNodes
                 .Include(n => n.OutgoingPaths)
                 .ThenInclude(p => p.ToNode)
                 .Include(n => n.IncomingPaths)
                 .ThenInclude(p => p.FromNode)
-                .Where(n => n.ExplorationMapId == explorationMapId)
+                .Where(n => n.ExplorationMapId == explorationMapId && n.PlayerId == playerId)
                 .ToArrayAsync();
         }
 
-        public async Task MarkNodeAsVisitedAsync(int nodeId)
+        public async Task MarkNodeAsVisitedAsync(int nodeId, Guid playerId)
         {
-            var node = await _context.ExplorationNodes.FindAsync(nodeId);
+            var node = await _context.ExplorationNodes
+                .FirstOrDefaultAsync(n => n.Id == nodeId && n.PlayerId == playerId);
+            
             if (node != null)
             {
                 node.Visited = true;
                 await _context.SaveChangesAsync();
             }
+            else
+            {
+                throw new UnauthorizedAccessException("ノードへのアクセス権がありません。");
+            }
         }
 
-        private (List<ExplorationNode> Nodes, List<ExplorationPathway> Pathways) ConvertToEntities(ExplorationMap map)
+        private (List<ExplorationNode> Nodes, List<ExplorationPathway> Pathways) ConvertToEntities(ExplorationMap map, Guid playerId)
         {
             var nodes = new List<ExplorationNode>();
             var pathways = new List<ExplorationPathway>();
@@ -74,6 +80,7 @@ namespace ArcaneBackend.Infrastructure.Services
                     Type = (Core.Entities.NodeType)modelNode.Type,
                     Visited = modelNode.Visited,
                     ExplorationMapId = map.Id,
+                    PlayerId = playerId,
                     OutgoingPaths = new List<ExplorationPathway>(),
                     IncomingPaths = new List<ExplorationPathway>()
                 };

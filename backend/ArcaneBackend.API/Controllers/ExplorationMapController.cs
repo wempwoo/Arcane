@@ -1,6 +1,8 @@
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ArcaneBackend.API.Models;
+using ArcaneBackend.API.Utils;
 using ArcaneBackend.Core.Entities;
 using ArcaneBackend.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -18,8 +20,7 @@ namespace ArcaneBackend.API.Controllers
     /// - プレイヤーの進行状況に応じた動的なマップ調整
     /// - マップ内の特殊イベントの管理
     /// </remarks>
-    // TODO: 認証を実装したら[Authorize]を有効化する
-    // [Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/exploration-maps")]
     public class ExplorationMapController : ControllerBase
@@ -42,8 +43,9 @@ namespace ArcaneBackend.API.Controllers
                 return BadRequest("マップのレベルは2から10の間で指定してください。");
             }
 
-            var mapId = await _mapService.GenerateMapAsync(request.MaxLevel);
-            var nodes = await _mapService.GetMapNodesAsync(mapId);
+            var playerId = AuthUtils.GetCurrentPlayerId(User);
+            var mapId = await _mapService.GenerateMapAsync(request.MaxLevel, playerId);
+            var nodes = await _mapService.GetMapNodesAsync(mapId, playerId);
 
             return Ok(CreateMapResponse(mapId, nodes));
         }
@@ -54,7 +56,8 @@ namespace ArcaneBackend.API.Controllers
         [HttpGet("{mapId}")]
         public async Task<ActionResult<ExplorationMapResponse>> GetMap(string mapId)
         {
-            var nodes = await _mapService.GetMapNodesAsync(mapId);
+            var playerId = AuthUtils.GetCurrentPlayerId(User);
+            var nodes = await _mapService.GetMapNodesAsync(mapId, playerId);
             if (!nodes.Any())
             {
                 return NotFound($"マップID '{mapId}' が見つかりません。");
@@ -69,7 +72,8 @@ namespace ArcaneBackend.API.Controllers
         [HttpPost("{mapId}/nodes/{nodeId}/visit")]
         public async Task<ActionResult> MarkNodeAsVisited(string mapId, int nodeId)
         {
-            var nodes = await _mapService.GetMapNodesAsync(mapId);
+            var playerId = AuthUtils.GetCurrentPlayerId(User);
+            var nodes = await _mapService.GetMapNodesAsync(mapId, playerId);
             var node = nodes.FirstOrDefault(n => n.Id == nodeId);
             
             if (node == null)
@@ -82,7 +86,7 @@ namespace ArcaneBackend.API.Controllers
                 return BadRequest("指定されたノードは、このマップに属していません。");
             }
 
-            await _mapService.MarkNodeAsVisitedAsync(nodeId);
+            await _mapService.MarkNodeAsVisitedAsync(nodeId, playerId);
             return NoContent();
         }
 

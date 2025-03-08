@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ArcaneBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(ArcaneDbContext))]
-    [Migration("20250307054947_AddExplorationMap")]
-    partial class AddExplorationMap
+    [Migration("20250308105238_AddPlayerIdToExplorationNode")]
+    partial class AddPlayerIdToExplorationNode
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -197,6 +197,9 @@ namespace ArcaneBackend.Infrastructure.Migrations
 
                     b.Property<int>("Level")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");

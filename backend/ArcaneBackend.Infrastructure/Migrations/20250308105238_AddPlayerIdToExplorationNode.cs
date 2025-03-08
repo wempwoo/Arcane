@@ -1,22 +1,42 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace ArcaneBackend.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddPlayerIdToExplorationNode : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "ExplorationNodes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    Lane = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Visited = table.Column<bool>(type: "boolean", nullable: false),
+                    ExplorationMapId = table.Column<string>(type: "text", nullable: false),
+                    PlayerId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExplorationNodes", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "players",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     DeviceId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    DeviceType = table.Column<int>(type: "integer", nullable: false),
                     Nickname = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     LastLoginAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
@@ -25,6 +45,32 @@ namespace ArcaneBackend.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_players", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExplorationPathways",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FromNodeId = table.Column<int>(type: "integer", nullable: false),
+                    ToNodeId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExplorationPathways", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ExplorationPathways_ExplorationNodes_FromNodeId",
+                        column: x => x.FromNodeId,
+                        principalTable: "ExplorationNodes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ExplorationPathways_ExplorationNodes_ToNodeId",
+                        column: x => x.ToNodeId,
+                        principalTable: "ExplorationNodes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -182,6 +228,16 @@ namespace ArcaneBackend.Infrastructure.Migrations
                 filter: "\"IsStartPoint\" = true");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ExplorationPathways_FromNodeId",
+                table: "ExplorationPathways",
+                column: "FromNodeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExplorationPathways_ToNodeId",
+                table: "ExplorationPathways",
+                column: "ToNodeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_players_DeviceId",
                 table: "players",
                 column: "DeviceId",
@@ -211,7 +267,13 @@ namespace ArcaneBackend.Infrastructure.Migrations
                 name: "ArcOrbs");
 
             migrationBuilder.DropTable(
+                name: "ExplorationPathways");
+
+            migrationBuilder.DropTable(
                 name: "SlotConnections");
+
+            migrationBuilder.DropTable(
+                name: "ExplorationNodes");
 
             migrationBuilder.DropTable(
                 name: "ArcOrbSlots");
